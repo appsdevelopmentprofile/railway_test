@@ -1,59 +1,100 @@
+from flask import Flask, render_template, request, redirect, url_for
+import numpy as np
+from scipy.optimize import minimize
+import matplotlib.pyplot as plt
+import io
+import base64
+import time
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import JSONResponse
-from PIL import Image
-import pytesseract
-import tempfile
-import fitz  # PyMuPDF for handling PDFs
-import shutil
-import os
+app = Flask(__name__)
 
-app = FastAPI()
+# Fonction pour calculer D_AB
+def calculate_D_AB(Xa, a_AB, a_BA, λ_a, λ_b, q_a, q_b, D_AB0, D_BA0, T):
+    Xb = 1 - Xa  # Fraction molaire de B
+    D = Xa*(D_BA0) + Xb*np.log(D_AB0) + \
+        2*(Xa*np.log(Xa+(Xb*λ_b)/λ_a)+Xb*np.log(Xb+(Xa*λ_a)/λ_b)) + \
+        2*Xa*Xb*((λ_a/(Xa*λ_a+Xb*λ_b))*(1-(λ_a/λ_b)) +
+                 (λ_b/(Xa*λ_a+Xb*λ_b))*(1-(λ_b/λ_a))) + \
+        Xb*q_a*((1-((Xb*q_b*np.exp(-a_BA/T))/(Xa*q_a+Xb*q_b*np.exp(-a_BA/T)))**2)*(-a_BA/T)+(1-((Xb*q_b)/(Xb*q_b+Xa*q_a*np.exp(-a_AB/T)))**2)*np.exp(-a_AB/T)*(-a_AB/T)) + \
+        Xa*q_b*((1-((Xa*q_a*np.exp(-a_AB/T))/(Xa*q_a*np.exp(-a_AB/T)+Xb*q_b))**2)*(-a_AB/T)+(1-((Xa*q_a)/(Xa*q_a+Xb*q_b*np.exp(-a_BA/T)))**2)*np.exp(-a_BA/T)*(-a_BA/T))
+    # Calcul de D_AB
+    return np.exp(D)
 
-# Set a temporary directory for file storage
-temp_dir = tempfile.gettempdir()
+# Fonction objectif pour la minimisation
+def objective(params, Xa_values, D_AB_exp, λ_a, λ_b, q_a, q_b, D_AB0, D_BA0, T):
+    a_AB, a_BA = params
+    D_AB_calculated = calculate_D_AB(Xa_values, a_AB, a_BA, λ_a, λ_b, q_a, q_b, D_AB0, D_BA0, T)
+    return np.sum((D_AB_calculated - D_AB_exp)**2)
 
-# Helper function to save the uploaded file
-def save_uploaded_file(uploaded_file):
-    temp_file_path = os.path.join(temp_dir, uploaded_file.filename)
-    with open(temp_file_path, "wb") as temp_file:
-        shutil.copyfileobj(uploaded_file.file, temp_file)
-    return temp_file_path
+@app.route('/')
+def input_data():
+    return render_template('index.html')
 
-# Endpoint to upload and process files
-@app.post("/upload/")
-async def upload_file(file: UploadFile = File(...)):
-    file_path = save_uploaded_file(file)
+@app.route('/calculate', methods=['POST'])
+def calculate():
+    if request.method == 'POST':
+        D_AB_exp = float(request.form['D_AB_exp'])
+        T = float(request.form['T'])
+        Xa = float(request.form['Xa'])
+        λ_a = eval(request.form['λ_a'])
+        λ_b = eval(request.form['λ_b'])
+        q_a = float(request.form['q_a'])
+        q_b = float(request.form['q_b'])
+        D_AB0 = float(request.form['D_AB0'])
+        D_BA0 = float(request.form['D_BA0'])
+        
+        # Paramètres initiaux
+        params_initial = [0, 0]
 
-    # Check file type and process accordingly
-    if file.content_type.startswith("image/"):
-        image = Image.open(file_path)
-        extracted_text = pytesseract.image_to_string(image)
-        os.remove(file_path)
-        return JSONResponse(content={"text": extracted_text if extracted_text else "No text found."})
+        # Tolerance
+        tolerance = 1e-12
 
-    elif file.content_type == "application/pdf":
-        doc_text = ""
-        pdf = fitz.open(file_path)
-        for page_num in range(pdf.page_count):
-            page = pdf[page_num]
-            doc_text += page.get_text("text")
-        pdf.close()
-        os.remove(file_path)
-        return JSONResponse(content={"text": doc_text if doc_text else "No text found in PDF."})
+        # Nombre maximal d'itérations
+        max_iterations = 1000
+        iteration = 0
 
-    else:
-        os.remove(file_path)
-        raise HTTPException(status_code=400, detail="Unsupported file type.")
+        # Temps de départ
+        start_time = time.time()
 
-# Endpoint to analyze document content
-@app.post("/analyze/")
-async def analyze_document(file: UploadFile = File(...)):
-    file_path = save_uploaded_file(file)
-    
-    # Placeholder for analysis result
-    doc_intelligence = "Feature extraction and analysis results for uploaded document."
-    
-    # Clean up the temporary file after processing
-    os.remove(file_path)
-    return JSONResponse(content={"analysis": doc_intelligence})
+        # Boucle d'ajustement des paramètres
+        while iteration < max_iterations:
+            # Minimisation de l'erreur
+            result = minimize(objective, params_initial, args=(Xa, D_AB_exp, λ_a, λ_b, q_a, q_b, D_AB0, D_BA0, T), method='Nelder-Mead')
+            # Paramètres optimisés
+            a_AB_opt, a_BA_opt = result.x
+            # Calcul de D_AB avec les paramètres optimisés
+            D_AB_opt = calculate_D_AB(Xa, a_AB_opt, a_BA_opt, λ_a, λ_b, q_a, q_b, D_AB0, D_BA0, T)
+            # Calcul de l'erreur
+            error = np.abs(D_AB_opt - D_AB_exp)
+            # Vérifier si la différence entre les paramètres optimisés est inférieure à la tolérance
+            if np.max(np.abs(np.array(params_initial) - np.array([a_AB_opt, a_BA_opt]))) < tolerance:
+                break
+            # Mise à jour des paramètres initiaux
+            params_initial = [a_AB_opt, a_BA_opt]
+            # Incrémentation du nombre d'itérations
+            iteration += 1
+
+        # Temps d'exécution
+        execution_time = time.time() - start_time
+
+        # Générer la courbe
+        Xa_values = np.linspace(0, 0.7, 100)  # Fraction molaire de A
+        D_AB_values = calculate_D_AB(Xa_values, a_AB_opt, a_BA_opt, λ_a, λ_b, q_a, q_b, D_AB0, D_BA0, T)
+        plt.plot(Xa_values, D_AB_values)
+        plt.xlabel('Fraction molaire de A')
+        plt.ylabel('Coefficient de diffusion (cm^2/s)')
+        plt.title('Variation du coefficient de diffusion en fonction du fraction molaire')
+        plt.grid(True)
+        
+        # Convertir le graphique en une représentation base64
+        buffer = io.BytesIO()
+        plt.savefig(buffer, format='png')
+        buffer.seek(0)
+        graph = base64.b64encode(buffer.getvalue()).decode()
+        plt.close()
+
+        # Affichage des résultats
+        return render_template('result.html', a_AB_opt=a_AB_opt, a_BA_opt=a_BA_opt, D_AB_opt=D_AB_opt, error=error, iteration=iteration, execution_time=execution_time, graph=graph)
+
+if __name__ == '__main__':
+    app.run(debug=True)
