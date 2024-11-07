@@ -1,11 +1,7 @@
-tensorflow
-keras
-streamlit
-streamlit-option-menu
-PyMuPDF
 fastapi
 uvicorn
 python-multipart
 pillow
+tensorflow
 pytesseract
-fitz
+pymupdf
