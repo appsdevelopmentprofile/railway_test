@@ -25,6 +25,12 @@ import tempfile
 import fitz  # PyMuPDF for handling PDFs
 import requests
 import streamlit_authenticator as stauth
+import pickle
+from pathlib import Path
+
+
+
+
 
 
 # Set page configuration at the start
@@ -44,29 +50,33 @@ st.set_page_config(
 names = ["Peter Parker", "Rebecca Miller"]
 usernames = ["pparker", "rmiller"]
 
-# load hashed passwords
+# Load hashed passwords
 file_path = Path(__file__).parent / "hashed_pw.pkl"
-with file_path.open("rb") as file:
-    hashed_passwords = pickle.load(file)
+try:
+    with file_path.open("rb") as file:
+        hashed_passwords = pickle.load(file)
+except FileNotFoundError:
+    st.error("Hashed password file not found. Please check the file path.")
 
+# Initialize authenticator
 authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
     "sales_dashboard", "abcdef", cookie_expiry_days=30)
 
+# Authentication check
 name, authentication_status, username = authenticator.login("Login", "main")
 
-if authentication_status == False:
+if authentication_status is False:
     st.error("Username/password is incorrect")
 
-if authentication_status == None:
+elif authentication_status is None:
     st.warning("Please enter your username and password")
 
-if authentication_status:
-
-
-    
-    # Sidebar navigation
+elif authentication_status:
+    # Sidebar and main app if logged in
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
+    # Rest of your sidebar and main code here
+  
     with st.sidebar:
         selected = option_menu(
             'Multiple AI Improvements - RFO Central Application',
