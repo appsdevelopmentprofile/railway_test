@@ -1,6 +1,5 @@
 ---
 title: OCR
-emoji: {{emoji}}
 colorFrom: blue
 colorTo: red
 sdk: streamlit
