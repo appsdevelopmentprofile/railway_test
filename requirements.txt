@@ -15,8 +15,7 @@ scikit-learn
 joblib
 python-docx
 uvicorn
-streamlit_authenticator
+streamlit-authenticator==0.1.5
 pandas
 openpyxl
 plotly
-
