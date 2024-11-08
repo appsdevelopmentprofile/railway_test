@@ -17,7 +17,6 @@ Once it is ready to be run, it will be downloaded as a Pythin (.py) file and be 
 
 import os
 import tensorflow as tf
-from keras.saving import register_keras_serializable
 import streamlit as st
 from streamlit_option_menu import option_menu
 from PIL import Image
@@ -25,6 +24,38 @@ import pytesseract
 import tempfile
 import fitz  # PyMuPDF for handling PDFs
 import requests
+import streamlit_authenticator as stauth
+
+# User credentials (you can modify this as needed)
+users = {
+    "user1": {"password": "password1", "name": "John Doe", "email": "john@example.com"},
+    "user2": {"password": "password2", "name": "Jane Smith", "email": "jane@example.com"}
+}
+
+# Create an authenticator instance
+authenticator = stauth.Authenticate(
+    usernames=list(users.keys()),
+    passwords=[user['password'] for user in users.values()],
+    names=[user['name'] for user in users.values()],
+    emails=[user['email'] for user in users.values()],
+    cookie_name="streamlit_auth",
+    key="authenticator"
+)
+
+# Add authentication to your Streamlit app
+name, authentication_status, username = authenticator.login("Login", "main")
+
+# Show the app if the user is authenticated
+if authentication_status:
+    st.write(f"Welcome {name}!")
+    # Your Streamlit app code here
+    # Example: display Streamlit components or a dashboard
+    st.title("Your Streamlit Prototype")
+    # (Add your main app code here)
+elif authentication_status is False:
+    st.error("Username or password is incorrect")
+elif authentication_status is None:
+    st.warning("Please enter your username and password")
 
 # Set page configuration
 st.set_page_config(
