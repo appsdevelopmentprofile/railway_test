@@ -26,8 +26,6 @@ import fitz  # PyMuPDF for handling PDFs
 import requests
 import streamlit_authenticator as stauth
 
-import streamlit as st
-import streamlit_authenticator as stauth
 
 # Define credentials
 credentials = {
@@ -42,9 +40,9 @@ credentials = {
 # Initialize authenticator
 authenticator = stauth.Authenticate(
     credentials,
-    "rfo_cookie",  # a unique name for the cookie used to remember the login state
-    "rfo_signature_key",  # a unique string as a signature key for cookies
-    cookie_expiry_days=30  # Optional: Set cookie expiry duration
+    "rfo_cookie",  # unique cookie name
+    "rfo_signature_key",  # signature key for cookie
+    cookie_expiry_days=30
 )
 
 # Login process
@@ -53,6 +51,7 @@ name, authentication_status, username = authenticator.login("Login", "sidebar")
 # Handle authentication
 if authentication_status:
     st.success(f"Welcome, {name}!")
+
     # Set page configuration
     st.set_page_config(
         page_title="Allnorth Consultants - RFO Central Application",
@@ -60,7 +59,6 @@ if authentication_status:
         page_icon="🧑‍⚕️"
     )
     
-    st.markdown("[Link to the app](https://huggingface.co/spaces/appsdevelopmentprofile/geosurveying)")
     
     # Sidebar navigation
     with st.sidebar:
