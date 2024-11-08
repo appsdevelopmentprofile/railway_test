@@ -27,12 +27,22 @@ import requests
 import streamlit_authenticator as stauth
 
 
-# Define credentials
+# Set page configuration at the start
+st.set_page_config(
+    page_title="Allnorth Consultants - RFO Central Application",
+    layout="wide",
+    page_icon="🧑‍⚕️"
+)
+
+# Generate the hashed password
+hashed_password = stauth.Hasher(["R8oS£Z9p6fVD"]).generate()[0]
+
+# Define credentials with hashed password
 credentials = {
     "usernames": {
         "rfo_central": {
             "name": "RFO Central User",
-            "password": "R8oS£Z9p6fVD"
+            "password": hashed_password
         }
     }
 }
@@ -46,18 +56,14 @@ authenticator = stauth.Authenticate(
 )
 
 # Login process
-name, authentication_status, username = authenticator.login("Login", "unrendered")
+name, authentication_status, username = authenticator.login("Login", "main")
 
 # Handle authentication
 if authentication_status:
     st.success(f"Welcome, {name}!")
 
-    # Set page configuration
-    st.set_page_config(
-        page_title="Allnorth Consultants - RFO Central Application",
-        layout="wide",
-        page_icon="🧑‍⚕️"
-    )
+
+    
     
     
     # Sidebar navigation
