@@ -26,24 +26,41 @@ import fitz  # PyMuPDF for handling PDFs
 import requests
 import streamlit_authenticator as stauth
 
-# User credentials (you can modify this as needed)
-users = {
-    "user1": {"password": "password1", "name": "John Doe", "email": "john@example.com"},
-    "user2": {"password": "password2", "name": "Jane Smith", "email": "jane@example.com"}
+import streamlit as st
+import streamlit_authenticator as stauth
+
+# Define credentials
+credentials = {
+    "usernames": {
+        "customer_username": {
+            "name": "Customer Name",
+            "password": stauth.Hasher(["customer_password"]).generate()[0]
+        },
+    }
 }
 
-# Create an authenticator instance
+# Initialize the authenticator with credentials
 authenticator = stauth.Authenticate(
-    usernames=list(users.keys()),
-    passwords=[user['password'] for user in users.values()],
-    names=[user['name'] for user in users.values()],
-    emails=[user['email'] for user in users.values()],
-    cookie_name="streamlit_auth",
-    key="authenticator"
+    credentials,
+    "app_name_cookie",  # Set a unique name for the cookie used to keep track of the session
+    "app_key_signature",  # Set a secure key for signature
+    cookie_expiry_days=1  # Set cookie expiration in days
 )
 
-# Add authentication to your Streamlit app
+# Use the login widget
 name, authentication_status, username = authenticator.login("Login", "main")
+
+# Handle authentication
+if authentication_status:
+    st.success(f"Welcome, {name}!")
+    # Display the rest of your app here
+
+elif authentication_status == False:
+    st.error("Username or password is incorrect")
+
+elif authentication_status == None:
+    st.warning("Please enter your username and password")
+
 
 # Show the app if the user is authenticated
 if authentication_status:
