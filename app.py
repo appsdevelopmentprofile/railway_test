@@ -32,22 +32,22 @@ import streamlit_authenticator as stauth
 # Define credentials
 credentials = {
     "usernames": {
-        "customer_username": {
-            "name": "Customer Name",
-            "password": stauth.Hasher(["customer_password"]).generate()[0]
-        },
+        "rfo_central": {
+            "name": "RFO Central User",
+            "password": "R8oS£Z9p6fVD"
+        }
     }
 }
 
-# Initialize the authenticator with credentials
+# Initialize authenticator
 authenticator = stauth.Authenticate(
     credentials,
-    "app_name_cookie",  # Set a unique name for the cookie used to keep track of the session
-    "app_key_signature",  # Set a secure key for signature
-    cookie_expiry_days=1  # Set cookie expiration in days
+    "some_cookie_name",  # a unique name for the cookie used to remember the login state
+    "some_signature_key",  # a unique string as a signature key for cookies
+    cookie_expiry_days=30  # Optional: Set cookie expiry duration
 )
 
-# Use the login widget
+# Login process
 name, authentication_status, username = authenticator.login("Login", "main")
 
 # Handle authentication
@@ -472,3 +472,6 @@ elif authentication_status == False:
 
 elif authentication_status == None:
     st.warning("Please enter your username and password")
+    
+# Add logout button
+authenticator.logout("Logout", "main")
