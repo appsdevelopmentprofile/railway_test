@@ -48,7 +48,7 @@ authenticator = stauth.Authenticate(
 )
 
 # Login process
-name, authentication_status, username = authenticator.login("Login", "main")
+name, authentication_status, username = authenticator.login("Login", "sidebar")
 
 # Handle authentication
 if authentication_status:
@@ -473,4 +473,5 @@ elif authentication_status == False:
 elif authentication_status == None:
     st.warning("Please enter your username and password")
     
-
+# Add logout button
+authenticator.logout("Logout", "sidebar")
