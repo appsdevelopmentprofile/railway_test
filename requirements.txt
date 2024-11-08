@@ -16,3 +16,7 @@ joblib
 python-docx
 uvicorn
 streamlit_authenticator
+pandas
+openpyxl
+plotly
+
