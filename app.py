@@ -46,6 +46,7 @@ credentials = {
 }
 
 # Initialize authenticator
+
 authenticator = stauth.Authenticate(
     credentials,
     "rfo_cookie",  # unique cookie name
@@ -54,11 +55,11 @@ authenticator = stauth.Authenticate(
 )
 
 # Login process
-name, authentication_status, username = authenticator.login("Login", "main")
+name, authentication_status, username = authenticator.login("Login", "sidebar")
 
 # Handle authentication
 if authentication_status:
-    st.success(f"Welcome, {name}!")
+    st.sidebar.title(f"Welcome {name}")
 
 
     
@@ -476,4 +477,4 @@ elif authentication_status == None:
     st.warning("Please enter your username and password")
     
 # Add logout button
-authenticator.logout("Logout", "unrendered")
+authenticator.logout("Logout", "sidebar")
