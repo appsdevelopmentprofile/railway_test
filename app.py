@@ -482,5 +482,4 @@ if authentication_status:
 
 elif authentication_status is None or st.session_state["logged_out"]:
     # If user clicks logout, redirect them to login page by updating session state
-    st.warning("Please log in to access the app.")
     st.session_state["logged_out"] = True
