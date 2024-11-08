@@ -6,12 +6,11 @@ import tempfile
 import fitz  # PyMuPDF for handling PDFs
 import shutil
 import os
+import logging
 
+# Initialize the app and configure logging
 app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the API!"}
+logging.basicConfig(level=logging.INFO)
 
 # Helper function to save the uploaded file
 def save_uploaded_file(uploaded_file):
@@ -23,6 +22,7 @@ def save_uploaded_file(uploaded_file):
 # Endpoint to upload and process files
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
+    # Save file and get its path
     file_path = save_uploaded_file(file)
 
     try:
@@ -42,27 +42,30 @@ async def upload_file(file: UploadFile = File(...)):
             raise HTTPException(status_code=400, detail="Unsupported file type.")
     
     except Exception as e:
+        logging.error(f"Error processing file: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
     
     finally:
-        os.remove(file_path)  # Ensure the file is removed after processing
+        os.remove(file_path)  # Clean up the temporary file
 
     return JSONResponse(content=result)
 
 # Endpoint to analyze document content
 @app.post("/analyze/")
 async def analyze_document(file: UploadFile = File(...)):
+    # Save file and get its path
     file_path = save_uploaded_file(file)
-    
+
     try:
-        # Placeholder for analysis result
+        # Placeholder for analysis logic (e.g., feature extraction)
         doc_intelligence = "Feature extraction and analysis results for uploaded document."
         result = {"analysis": doc_intelligence}
     
     except Exception as e:
+        logging.error(f"Error analyzing document: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error analyzing document: {str(e)}")
     
     finally:
-        os.remove(file_path)  # Clean up the temporary file after processing
+        os.remove(file_path)  # Clean up the temporary file
 
     return JSONResponse(content=result)
