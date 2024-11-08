@@ -476,3 +476,5 @@ if authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
             
+if authentication_status is None:
+    st.warning("Please log in to access the app.")
