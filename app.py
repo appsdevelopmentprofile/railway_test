@@ -33,6 +33,9 @@ st.set_page_config(
     page_icon="🧑‍⚕️"
 )
 
+st.markdown("[Link to the app](https://huggingface.co/spaces/appsdevelopmentprofile/geosurveying)")
+
+
 # Load or initialize the pre-trained model
 working_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(working_dir, 'saved_models', 'doc_intelligence_model.keras')
