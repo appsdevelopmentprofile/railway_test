@@ -43,9 +43,6 @@ st.set_page_config(
 
 
 
-
-
-
 # --- USER AUTHENTICATION ---
 names = ["Peter Parker", "Rebecca Miller"]
 usernames = ["pparker", "rmiller"]
@@ -59,8 +56,17 @@ except FileNotFoundError:
     st.error("Hashed password file not found. Please check the file path.")
 
 # Initialize authenticator
-authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
-    "sales_dashboard", "abcdef", cookie_expiry_days=30)
+
+
+authenticator = stauth.Authenticate(
+    names=names,
+    usernames=usernames,
+    passwords=hashed_passwords,
+    cookie_name="sales_dashboard",
+    key="abcdef",
+    cookie_expiry_days=30  # Only provided here once
+)
+
 
 # Authentication check
 name, authentication_status, username = authenticator.login("Login", "main")
