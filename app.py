@@ -42,8 +42,8 @@ credentials = {
 # Initialize authenticator
 authenticator = stauth.Authenticate(
     credentials,
-    "some_cookie_name",  # a unique name for the cookie used to remember the login state
-    "some_signature_key",  # a unique string as a signature key for cookies
+    "rfo_cookie",  # a unique name for the cookie used to remember the login state
+    "rfo_signature_key",  # a unique string as a signature key for cookies
     cookie_expiry_days=30  # Optional: Set cookie expiry duration
 )
 
