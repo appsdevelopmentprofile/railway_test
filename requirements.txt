@@ -1,11 +1,10 @@
-pymupdf
 tensorflow
 keras
 streamlit
 python-multipart
 streamlit-option-menu
 pillow
-tesseract
+pytesseract
 pymupdf
 numpy
 matplotlib
