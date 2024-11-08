@@ -34,15 +34,13 @@ st.set_page_config(
     page_icon="🧑‍⚕️"
 )
 
-# Generate the hashed password
-hashed_password = stauth.Hasher(["R8oS£Z9p6fVD"]).generate()[0]
 
 # Define credentials with hashed password
 credentials = {
     "usernames": {
         "rfo_central": {
             "name": "RFO Central User",
-            "password": hashed_password
+            "password": "R8oS£Z9p6fVD",
         }
     }
 }
