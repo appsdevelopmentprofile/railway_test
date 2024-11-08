@@ -475,6 +475,12 @@ if authentication_status:
                 st.download_button('Download Report', data=encoded, file_name='Project_Completion_Report.docx')
         
             st.success("Report generated successfully! You can download it using the button above.")
-            
-if authentication_status is None:
+
+# If the user clicks "Logout", update session to reflect the logout
+if "logged_out" not in st.session_state:
+    st.session_state["logged_out"] = False  # Initial state for tracking logout
+
+elif authentication_status is None or st.session_state["logged_out"]:
+    # If user clicks logout, redirect them to login page by updating session state
     st.warning("Please log in to access the app.")
+    st.session_state["logged_out"] = True
