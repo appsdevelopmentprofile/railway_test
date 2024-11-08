@@ -473,5 +473,4 @@ elif authentication_status == False:
 elif authentication_status == None:
     st.warning("Please enter your username and password")
     
-# Add logout button
-authenticator.logout("Logout", "main")
+
