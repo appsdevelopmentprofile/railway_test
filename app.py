@@ -43,7 +43,6 @@ st.set_page_config(
 
 # --- USER AUTHENTICATION ---
 
-
 # Define the credentials for a single user without hashing
 credentials = {
     "usernames": {
@@ -53,6 +52,8 @@ credentials = {
         }
     }
 }
+
+authenticator = stauth.Authenticate(credentials, "cookie_name", "key", 30)
 
 
 # Authentication check
