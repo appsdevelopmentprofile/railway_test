@@ -253,7 +253,7 @@ if authentication_status:
     ## Module 3 - Automated Field Tech Assistance - Fault Detection
     
     # Bring up the page when it is selected on the sidebar
-    if selected == "Real-Time Fault Monitoring - Real Time Field Tech Assistance":
+    if selected == "Real-Time Fault Monitoring":
         # Importing necessary libraries to make the front end work
         import streamlit as st
         import numpy as np
@@ -381,7 +381,7 @@ if authentication_status:
     # Module 4 - Project Completion Reporting for Oil and Gas
     
     # Bring up the page when it is selecte on the side bar
-    if selected == "Project Completion Reporting for Oil and Gas":
+    if selected == "Project Completion Reporting":
     
         import streamlit as st
         import base64
