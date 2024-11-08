@@ -44,16 +44,27 @@ st.set_page_config(
 
 
 # --- USER AUTHENTICATION ---
-names = ["Peter Parker", "Rebecca Miller"]
-usernames = ["pparker", "rmiller"]
 
-# Load hashed passwords
-file_path = Path(__file__).parent / "hashed_pw.pkl"
-try:
-    with file_path.open("rb") as file:
-        hashed_passwords = pickle.load(file)
-except FileNotFoundError:
-    st.error("Hashed password file not found. Please check the file path.")
+
+
+
+
+# Define your user information in a dictionary for the credentials argument
+credentials = {
+    "usernames": {
+        "user1": {
+            "name": "User One",
+            "password": stauth.Hasher(['password1']).generate()[0]  # Replace 'password1' with actual password
+        },
+        "user2": {
+            "name": "User Two",
+            "password": stauth.Hasher(['password2']).generate()[0]  # Replace 'password2' with actual password
+        }
+    }
+}
+
+
+
 
 # Initialize authenticator
 
