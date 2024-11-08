@@ -1,3 +1,15 @@
+---
+title: OCR
+emoji: {{emoji}}
+colorFrom: blue
+colorTo: red
+sdk: streamlit
+app_file: app.py
+pinned: false
+---
+
+
+
 # Proposed architecture
 
 Modules & Their Setup Needs
