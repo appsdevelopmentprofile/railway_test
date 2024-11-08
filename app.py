@@ -122,4 +122,14 @@ elif authentication_status:
                     for page_num in range(pdf.page_count):
                         page = pdf[page_num]
                         doc_text += page.get_text("text")
-                    st.subheader("Extracted Text fro
+                    st.subheader("Extracted Text from PDF:")
+                    st.write(doc_text if doc_text else "No text found in PDF.")
+                    pdf.close()
+
+                # Remove temporary file
+                os.remove(temp_file_path)
+
+        # Document Analysis Button
+        if st.button('Analyze Document Content'):
+            # Placeholder for future document content analysis
+            st.success("Feature extraction and analysis results will be displayed here.")
