@@ -41,8 +41,6 @@ st.set_page_config(
 )
 
 
-
-
 # --- USER AUTHENTICATION ---
 
 
@@ -55,29 +53,6 @@ credentials = {
         }
     }
 }
-
-
-
-# Define your user information in a dictionary for the credentials argument
-# Initialize the authenticator
-authenticator = stauth.Authenticate(
-    credentials=credentials,
-    cookie_name="sales_dashboard",
-    key="abcdef",
-    cookie_expiry_days=30
-)
-
-# Streamlit authentication
-name, authentication_status, username = authenticator.login("Login", "main")
-
-# Display appropriate messages based on the login status
-if authentication_status:
-    st.success(f"Welcome {name}!")
-elif authentication_status is False:
-    st.error("Username/password is incorrect")
-elif authentication_status is None:
-    st.warning("Please enter your username and password")
-
 
 
 # Authentication check
