@@ -35,45 +35,6 @@ st.set_page_config(
 
 st.markdown("[Link to the app](https://huggingface.co/spaces/appsdevelopmentprofile/geosurveying)")
 
-
-
-# Load or initialize the pre-trained model
-working_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(working_dir, 'saved_models', 'doc_intelligence_model.keras')
-
-if not os.path.exists(model_path):
-    # Assuming GCN is defined elsewhere
-    # model = GCN()  # Uncomment if GCN is available
-    # model.save(model_path)  # Uncomment if GCN is available
-    pass  # Placeholder to avoid errors if GCN is unavailable
-
-doc_intelligence_model = tf.keras.models.load_model(model_path)
-
-
-@register_keras_serializable(package='Custom')
-class GCN(tf.keras.layers.Layer):
-    def __init__(self, units, **kwargs):
-        super(GCN, self).__init__(**kwargs)
-        self.units = units
-
-    def build(self, input_shape):
-        # Build the layer as usual
-        self.kernel = self.add_weight(
-            name='kernel', 
-            shape=(input_shape[1], self.units),
-            initializer='glorot_uniform',
-            trainable=True
-        )
-
-    def call(self, inputs):
-        # Implement the forward pass for the layer
-        return tf.matmul(inputs, self.kernel)
-
-    def get_config(self):
-        config = super(GCN, self).get_config()
-        config.update({'units': self.units})
-        return config
-
 # Sidebar navigation
 with st.sidebar:
     selected = option_menu(
