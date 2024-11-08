@@ -52,17 +52,12 @@ st.set_page_config(
 # Define your user information in a dictionary for the credentials argument
 credentials = {
     "usernames": {
-        "user1": {
-            "name": "User One",
-            "password": stauth.Hasher(['password1']).generate()  # Replace 'password1' with actual password
-        },
-        "user2": {
-            "name": "User Two",
-            "password": stauth.Hasher(['password2']).generate()  # Replace 'password2' with actual password
+        "rfo_central": {
+            "name": "RFO Central",
+            "password": "1234"  # Plain-text password
         }
     }
 }
-
 
 
 
