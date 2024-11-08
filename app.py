@@ -63,44 +63,10 @@ if authentication_status == None:
 if authentication_status:
 
 
-
-
-    
-
-
-
-
-# Define credentials with hashed password
-credentials = {
-    "usernames": {
-        "rfo_central": {
-            "name": "RFO Central User",
-            "password": "R8oS£Z9p6fVD",
-        }
-    }
-}
-
-# Initialize authenticator
-
-authenticator = stauth.Authenticate(
-    credentials,
-    "rfo_cookie",  # unique cookie name
-    "rfo_signature_key",  # signature key for cookie
-    cookie_expiry_days=30
-)
-
-# Login process
-name, authentication_status, username = authenticator.login("Login", "sidebar")
-
-# Handle authentication
-if authentication_status:
-    st.sidebar.title(f"Welcome {name}")
-
-
-    
-    
     
     # Sidebar navigation
+    authenticator.logout("Logout", "sidebar")
+    st.sidebar.title(f"Welcome {name}")
     with st.sidebar:
         selected = option_menu(
             'Multiple AI Improvements - RFO Central Application',
@@ -504,12 +470,3 @@ if authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-
-elif authentication_status == False:
-    st.error("Username or password is incorrect")
-
-elif authentication_status == None:
-    st.warning("Please enter your username and password")
-    
-# Add logout button
-authenticator.logout("Logout", "sidebar")
