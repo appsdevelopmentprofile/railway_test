@@ -94,7 +94,7 @@ os.makedirs("temp", exist_ok=True)
 
 # Doc Intelligence Section
 if selected == 'Doc Intelligence':
-    st.title("Doc Intelligence with CNNs and GCNs")
+    st.title("Doc Intelligence with CNNs")
 
     # File uploader for multiple files (images, PDFs)
     uploaded_files = st.file_uploader("Upload your documents (images, PDFs)", type=['png', 'jpg', 'jpeg', 'pdf'], accept_multiple_files=True)
