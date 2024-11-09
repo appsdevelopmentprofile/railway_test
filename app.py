@@ -41,14 +41,9 @@ authenticator = stauth.Authenticate(
 
 name, authentication_status, username = authenticator.login("Login", "main")
 
-
-# Define a logout function
-def logout_and_redirect():
-    authenticator.logout("Logout", "sidebar")
-    st.session_state["authentication_status"] = None
-    st.experimental_rerun()  # Refreshes the page to go back to the login screen
-
-
+# If the user clicks "Logout", update session to reflect the logout
+if "logged_out" not in st.session_state:
+    st.session_state["logged_out"] = False  # Initial state for tracking logout
 
 if authentication_status == False:
     st.error("Username/password is incorrect")
@@ -58,10 +53,8 @@ elif authentication_status == None:
 
 elif authentication_status:
     # ---- SIDEBAR ----
-    if st.button("Logout", "sidebar"):
-        logout_and_redirect()
+    authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
-
 
     # Sidebar navigation
     with st.sidebar:
@@ -470,9 +463,3 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-
-# Display logout button
-elif st.button("Logout"):
-    authenticator.logout("Logout", "main")
-    st.session_state["authentication_status"] = None
-    st.experimental_rerun()  # Refresh the page to show the login screen
