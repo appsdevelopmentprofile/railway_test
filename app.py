@@ -81,12 +81,14 @@ elif authentication_status:
 
 # ---- MODULE 1: Doc Intelligence Section ---- 
     if selected == 'Doc Intelligence':
+
+        
+        """# Load the model and tokenizer
+
         from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
 
         # Set up your token
         HF_TOKEN = "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"
-        
-        """# Load the model and tokenizer
 
         # Use from_tf=True to load the TensorFlow model
         model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
