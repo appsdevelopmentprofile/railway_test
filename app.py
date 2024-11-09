@@ -97,9 +97,7 @@ elif authentication_status:
         # Save tokenizer files to local directory
         tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
-        
-        nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
-
+    
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
