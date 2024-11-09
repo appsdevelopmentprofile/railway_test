@@ -59,9 +59,9 @@ elif authentication_status == None:
 elif authentication_status:
     # ---- SIDEBAR ----
     if st.button("Logout"):
-    authenticator.logout("Logout", "sidebar")
-    logout_and_redirect()
-    st.sidebar.title(f"Welcome {name}")
+        authenticator.logout("Logout", "sidebar")
+        logout_and_redirect()
+        st.sidebar.title(f"Welcome {name}")
 
 
     # Sidebar navigation
