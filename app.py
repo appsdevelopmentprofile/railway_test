@@ -53,11 +53,8 @@ elif authentication_status == None:
 
 elif authentication_status:
     # ---- SIDEBAR ----
-    authenticator.logout("Logout", "sidebar")
-
-    # Display logout button
     if st.button("Logout"):
-        authenticator.logout("Logout", "main")
+        authenticator.logout("Logout", "sidebar")
         st.session_state["authentication_status"] = None
         st.experimental_rerun()  # Refresh the page to show the login screen
     
