@@ -18,7 +18,9 @@ from sklearn.cluster import AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
-from transformers import BertTokenizerFast, BertForSequenceClassification, AutoTokenizer
+from transformers import BertTokenizerFast, BertForSequenceClassification, TFAutoModelForSequenceClassification, AutoTokenizer, pipeline
+
+
 
 
 # --- Set page configuration ---
@@ -84,14 +86,18 @@ elif authentication_status:
         HF_TOKEN = "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"
         
         # Load the model and tokenizer
-        model = BertForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
-        tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
-        # Save tokenizer files to local directory
-        tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+        # Use from_tf=True to load the TensorFlow model
+        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN, from_tf=True)
+
+        tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
+
+        # Save tokenizer files to local directory
+        tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+
         
         def doc_intelligence():
             # Set up the page for document intelligence
