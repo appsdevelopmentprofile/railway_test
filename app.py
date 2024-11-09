@@ -18,7 +18,7 @@ from sklearn.cluster import AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
-from transformers import TFBertTokenizerFast, TFBertForSequenceClassification, pipeline
+from transformers import BertTokenizerFast, TFBertForSequenceClassification, pipeline
 
 # --- Set page configuration ---
 st.set_page_config(
@@ -79,7 +79,7 @@ elif authentication_status:
     if selected == 'Doc Intelligence':
         # Load the model and tokenizer using TensorFlow
         model = TFBertForSequenceClassification.from_pretrained("bert-base-uncased")
-        tokenizer = TFBertTokenizerFast.from_pretrained("bert-base-uncased")
+        tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer, framework="tf")
@@ -163,7 +163,6 @@ elif authentication_status:
     # Execute doc_intelligence function
     if selected == 'Doc Intelligence':
         doc_intelligence()
-
 
 
 
