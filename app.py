@@ -85,7 +85,10 @@ elif authentication_status:
         model = TFAutoModelForSequenceClassification.from_pretrained(
             "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
-        tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
+        )
 
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
 
