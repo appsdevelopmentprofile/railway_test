@@ -3,7 +3,7 @@ from pathlib import Path
 
 import streamlit_authenticator as stauth
 
-names = ["allnorth consultants"]
+names = ["allnorth_consultants"]
 usernames = ["rfocentral"]
 passwords = ["116I90ZsU\-Z"]
 
