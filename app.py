@@ -18,8 +18,8 @@ from sklearn.cluster import AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
-from transformers import BertTokenizerFast, BertForSequenceClassification
-
+from transformers import BertTokenizerFast, BertForSequenceClassification, AutoTokenizer
+from transformers import 
 
 
 
@@ -94,6 +94,10 @@ elif authentication_status:
             "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
 
+        # Save tokenizer files to local directory
+        tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
+        )
+        
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
 
         
