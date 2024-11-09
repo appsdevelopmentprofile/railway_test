@@ -78,12 +78,6 @@ elif authentication_status:
     if selected == 'Doc Intelligence':
         st.title("Document Intelligence with OCR")
 
-        from huggingface_hub import from_pretrained_keras
-
-        # Load the model from Hugging Face Hub
-        model = from_pretrained_keras("appsdevelopmentprofile/doc_intelligence_model")
-
-        
         # File uploader for multiple files (images, PDFs)
         uploaded_files = st.file_uploader("Upload your documents (images, PDFs)", type=['png', 'jpg', 'jpeg', 'pdf'], accept_multiple_files=True)
 
