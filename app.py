@@ -84,12 +84,10 @@ elif authentication_status:
         HF_TOKEN = "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"
         
         # Load the model with the token
-        model = BertTokenizerFast.from_pretrained(
-            "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
+        model = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
 
-        tokenizer = BertForSequenceClassification.from_pretrained(
-            "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
+        tokenizer = BertForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
 
         # Save tokenizer files to local directory
