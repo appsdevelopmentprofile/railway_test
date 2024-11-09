@@ -1,5 +1,5 @@
 tensorflow
-keras
+tf-keras
 streamlit
 python-multipart
 streamlit-option-menu
