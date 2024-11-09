@@ -88,9 +88,9 @@ elif authentication_status:
         # Load the model and tokenizer
 
         # Use from_tf=True to load the TensorFlow model
-        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN, from_tf=True)
+        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
-        tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+        tokenizer = AutoTokenizer.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
@@ -98,6 +98,7 @@ elif authentication_status:
         # Save tokenizer files to local directory
         tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
+        
         
         def doc_intelligence():
             # Set up the page for document intelligence
