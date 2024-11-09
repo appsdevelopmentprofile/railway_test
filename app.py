@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
 
-# Set page configuration
+# --- Set page configuration ---
 st.set_page_config(
     page_title="Allnorth Consultants - RFO Central Application",
     layout="wide",
