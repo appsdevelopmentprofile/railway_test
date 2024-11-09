@@ -18,6 +18,10 @@ from sklearn.cluster import AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
+from transformers import BertTokenizerFast BertForSequenceClassification
+
+
+
 
 # --- Set page configuration ---
 st.set_page_config(
@@ -82,11 +86,11 @@ elif authentication_status:
         HF_TOKEN = "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"
         
         # Load the model with the token
-        model = TFAutoModelForSequenceClassification.from_pretrained(
+        model = BertTokenizerFast.from_pretrained(
             "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
 
-        tokenizer = AutoTokenizer.from_pretrained(
+        tokenizer = BertForSequenceClassification.from_pretrained(
             "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
 
