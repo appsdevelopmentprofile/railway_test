@@ -80,29 +80,7 @@ elif authentication_status:
     os.makedirs("temp", exist_ok=True)
 
 # ---- MODULE 1: Doc Intelligence Section ---- 
-    if selected == 'Doc Intelligence':
-
-        
-        # Load the model and tokenizer
-
-        #from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
-
-        # Set up your token
-       # HF_TOKEN = "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"
-
-        # Use from_tf=True to load the TensorFlow model
-        #model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
-
-        #tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
-        
-        # Initialize a pipeline for prediction
-       #nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
-
-        # Save tokenizer files to local directory
-        #tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
-    
-        
-        
+    if selected == 'Doc Intelligence': 
         def doc_intelligence():
             # Set up the page for document intelligence
             st.title("Document Intelligence with OCR")
