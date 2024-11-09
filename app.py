@@ -56,7 +56,8 @@ elif authentication_status == None:
     st.warning("Please enter your username and password")
 
 elif authentication_status:
-    # ---- SIDEBAR ----
+
+# ---- SIDEBAR ----
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
 
@@ -78,14 +79,14 @@ elif authentication_status:
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
 
-    # Doc Intelligence Section
+# ---- MODULE 1: Doc Intelligence Section ---- 
     if selected == 'Doc Intelligence':
         from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
 
         # Set up your token
         HF_TOKEN = "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"
         
-        # Load the model and tokenizer
+        """# Load the model and tokenizer
 
         # Use from_tf=True to load the TensorFlow model
         model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
@@ -97,7 +98,7 @@ elif authentication_status:
 
         # Save tokenizer files to local directory
         tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
-
+"""
         
         
         def doc_intelligence():
