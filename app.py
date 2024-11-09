@@ -18,7 +18,7 @@ from sklearn.cluster import AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
-from transformers import BertTokenizerFast BertForSequenceClassification
+from transformers import BertTokenizerFast, BertForSequenceClassification
 
 
 
