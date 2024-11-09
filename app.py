@@ -76,7 +76,7 @@ elif authentication_status:
 
     # Doc Intelligence Section
     if selected == 'Doc Intelligence':
-        from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
+        from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
         
         # Load the model and tokenizer from Hugging Face Hub
         model_name = "appsdevelopmentprofile/doc_intelligence_model"  # Replace with your model name
