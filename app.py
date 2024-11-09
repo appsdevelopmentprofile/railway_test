@@ -83,24 +83,24 @@ elif authentication_status:
     if selected == 'Doc Intelligence':
 
         
-        """# Load the model and tokenizer
+        # Load the model and tokenizer
 
-        from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
+        #from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
 
         # Set up your token
-        HF_TOKEN = "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"
+       # HF_TOKEN = "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"
 
         # Use from_tf=True to load the TensorFlow model
-        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+        #model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
-        tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+        #tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
         
         # Initialize a pipeline for prediction
-        nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
+       #nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
 
         # Save tokenizer files to local directory
-        tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
-"""
+        #tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+    
         
         
         def doc_intelligence():
