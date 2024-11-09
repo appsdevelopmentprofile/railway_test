@@ -83,21 +83,12 @@ elif authentication_status:
         # Set up your token
         HF_TOKEN = "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"
         
-        # Load the model with the token
-        model = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
-        )
+        # Load the model and tokenizer
+        model = BertForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+        tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
-        tokenizer = BertForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
-        )
-
-
-        model_name = 'tf_model'  # or your model path
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        
         # Save tokenizer files to local directory
-        tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
-        )
-    
+        tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
