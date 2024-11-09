@@ -78,6 +78,12 @@ elif authentication_status:
     if selected == 'Doc Intelligence':
         from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
 
+
+        from huggingface_hub import snapshot_download
+        snapshot_download(repo_id="appsdevelopmentprofile/doc_intelligence_model")
+
+
+        
         # Set up your token
         HF_TOKEN = "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"
         
