@@ -90,6 +90,10 @@ elif authentication_status:
         tokenizer = BertForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
 
+
+        model_name = 'tf_model'  # or your model path
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        
         # Save tokenizer files to local directory
         tokenizer.save_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
