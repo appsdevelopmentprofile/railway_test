@@ -463,3 +463,9 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
+
+# Display logout button
+elif st.button("Logout"):
+        authenticator.logout("Logout", "main")
+        st.session_state["authentication_status"] = None
+        st.experimental_rerun()  # Refresh the page to show the login screen
