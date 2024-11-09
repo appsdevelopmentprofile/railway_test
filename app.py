@@ -80,7 +80,7 @@ elif authentication_status:
         
         # Load the model and tokenizer from Hugging Face Hub
         model_name = "appsdevelopmentprofile/doc_intelligence_model"  # Replace with your model name
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+        model = TFAutoModelForSequenceClassification.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
         
         # Initialize a pipeline for prediction
