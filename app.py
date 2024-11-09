@@ -12,11 +12,14 @@ import pickle
 from pathlib import Path
 import pandas as pd  # pip install pandas openpyxl
 import plotly.express as px  # pip install plotly-express
-import streamlit as st  # pip install streamlit
-import streamlit_authenticator as stauth  # pip install streamlit-authenticator
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import AgglomerativeClustering
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
 
-
-# Set page configuration at the start
+# Set page configuration
 st.set_page_config(
     page_title="Allnorth Consultants - RFO Central Application",
     layout="wide",
@@ -24,16 +27,17 @@ st.set_page_config(
 )
 
 # --- USER AUTHENTICATION ---
-names = ["allnorth consultants"]
+names = ["allnorth_consultants"]
 usernames = ["rfocentral"]
 
-# load hashed passwords
-file_path = Path(__file__).parent / "hashed_pw.pkl"
+# Load hashed passwords
+file_path = Path("hashed_pw.pkl")
 with file_path.open("rb") as file:
     hashed_passwords = pickle.load(file)
 
-authenticator = stauth.Authenticate(names, usernames, hashed_passwords,
-    "sales_dashboard", "abcdef", cookie_expiry_days=1)
+authenticator = stauth.Authenticate(
+    names, usernames, hashed_passwords, "allnorth_consultants", "rfocentral", cookie_expiry_days=30
+)
 
 name, authentication_status, username = authenticator.login("Login", "main")
 
@@ -44,11 +48,10 @@ if "logged_out" not in st.session_state:
 if authentication_status == False:
     st.error("Username/password is incorrect")
 
-if authentication_status == None:
+elif authentication_status == None:
     st.warning("Please enter your username and password")
 
-if authentication_status:
-
+elif authentication_status:
     # ---- SIDEBAR ----
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
@@ -132,7 +135,6 @@ if authentication_status:
 
         # Document Analysis Button
         if st.button('Analyze Document Content'):
-            # Placeholder for future document content analysis
             st.success("Feature extraction and analysis results will be displayed here.")
 
 
