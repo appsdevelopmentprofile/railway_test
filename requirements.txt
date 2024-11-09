@@ -20,5 +20,4 @@ pandas
 openpyxl
 plotly
 huggingface_hub
-transformers==4.33.2
---upgrade pip
+transformers>=4.33.0
