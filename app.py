@@ -19,8 +19,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
 from transformers import BertTokenizerFast, BertForSequenceClassification, AutoTokenizer
-from transformers import 
-
 
 
 # --- Set page configuration ---
