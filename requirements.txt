@@ -19,3 +19,4 @@ streamlit-authenticator==0.1.5
 pandas
 openpyxl
 plotly
+huggingface_hub
