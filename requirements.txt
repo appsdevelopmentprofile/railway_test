@@ -21,3 +21,4 @@ openpyxl
 plotly
 huggingface_hub
 transformers>=4.33.0
+torch==2.1.0
