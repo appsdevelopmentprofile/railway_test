@@ -88,7 +88,7 @@ elif authentication_status:
         # Load the model and tokenizer
 
         # Use from_tf=True to load the TensorFlow model
-        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN, from_tf=True)
+        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
         tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
         
