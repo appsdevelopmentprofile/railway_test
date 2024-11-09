@@ -90,7 +90,7 @@ elif authentication_status:
         # Use from_tf=True to load the TensorFlow model
         model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
 
-        tokenizer = AutoTokenizer.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
+        tokenizer = BertTokenizerFast.from_pretrained("appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN)
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
