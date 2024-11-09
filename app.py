@@ -18,7 +18,7 @@ from sklearn.cluster import AgglomerativeClustering
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
-from transformers import BertTokenizerFast, BertForSequenceClassification, TFAutoModelForSequenceClassification, AutoTokenizer, pipeline
+from transformers import BertTokenizerFast, BertForSequenceClassification, pipeline
 
 # --- Set page configuration ---
 st.set_page_config(
@@ -53,7 +53,6 @@ elif authentication_status == None:
     st.warning("Please enter your username and password")
 
 elif authentication_status:
-
     # ---- SIDEBAR ----
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
@@ -76,9 +75,16 @@ elif authentication_status:
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
 
-    # ---- MODULE 1: Doc Intelligence Section ---- 
+    # Doc Intelligence Section
     if selected == 'Doc Intelligence':
+        # Load the model and tokenizer
+        model = BertForSequenceClassification.from_pretrained("bert-base-uncased")
+        tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
+        
+        # Initialize a pipeline for prediction
+        nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
 
+        # Function to process the uploaded files
         def doc_intelligence():
             # Set up the page for document intelligence
             st.title("Document Intelligence with OCR")
@@ -153,8 +159,11 @@ elif authentication_status:
             # Document Analysis Button
             if st.button('Analyze Document Content'):
                 st.success("Feature extraction and analysis results will be displayed here.")
-        
-        doc_intelligence()  # Call the function to render the Document Intelligence module
+
+    # Execute doc_intelligence function
+    if selected == 'Doc Intelligence':
+        doc_intelligence()
+
 
 
 
