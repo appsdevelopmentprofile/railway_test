@@ -463,6 +463,3 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-elif authentication_status is None or st.session_state["logged_out"]:
-    # If user clicks logout, redirect them to login page by updating session state
-    st.session_state["logged_out"] = True
