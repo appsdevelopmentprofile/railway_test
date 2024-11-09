@@ -54,8 +54,6 @@ elif authentication_status == None:
 elif authentication_status:
     # ---- SIDEBAR ----
     authenticator.logout("Logout", "sidebar")
-    st.experimental_rerun()  # Refresh the page to show the login screen
-    
     st.sidebar.title(f"Welcome {name}")
 
     # Sidebar navigation
