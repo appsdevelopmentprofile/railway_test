@@ -78,12 +78,6 @@ elif authentication_status:
     if selected == 'Doc Intelligence':
         from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
 
-
-        from huggingface_hub import snapshot_download
-        snapshot_download(repo_id="appsdevelopmentprofile/doc_intelligence_model")
-
-
-        
         # Set up your token
         HF_TOKEN = "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"
         
@@ -91,9 +85,10 @@ elif authentication_status:
         model = TFAutoModelForSequenceClassification.from_pretrained(
             "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
         )
-        tokenizer = AutoTokenizer.from_pretrained(
-            "appsdevelopmentprofile/doc_intelligence_model", use_auth_token=HF_TOKEN
-        )
+        tokenizer = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+        nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
+
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
