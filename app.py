@@ -44,7 +44,7 @@ name, authentication_status, username = authenticator.login("Login", "main")
 
 # Define a logout function
 def logout_and_redirect():
-    authenticator.logout("Logout", "main")
+    authenticator.logout("Logout", "sidebar")
     st.session_state["authentication_status"] = None
     st.experimental_rerun()  # Refreshes the page to go back to the login screen
 
@@ -59,7 +59,6 @@ elif authentication_status == None:
 elif authentication_status:
     # ---- SIDEBAR ----
     if st.button("Logout"):
-        authenticator.logout("Logout", "sidebar")
         logout_and_redirect()
         st.sidebar.title(f"Welcome {name}")
 
