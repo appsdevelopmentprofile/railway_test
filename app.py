@@ -79,14 +79,9 @@ elif authentication_status:
         from transformers import pipeline, TFAutoModelForSequenceClassification, AutoTokenizer
 
         os.environ["HUGGINGFACEHUB_API_TOKEN"] = "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"
-        model = AutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model")
+        model = TFAutoModelForSequenceClassification.from_pretrained("appsdevelopmentprofile/doc_intelligence_model")
         tokenizer = AutoTokenizer.from_pretrained("appsdevelopmentprofile/doc_intelligence_model")
 
-        
-        # Load the model and tokenizer from Hugging Face Hub
-        model_name = "appsdevelopmentprofile/doc_intelligence_model"  # Replace with your model name
-        model = TFAutoModelForSequenceClassification.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
         
         # Initialize a pipeline for prediction
         nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer)
