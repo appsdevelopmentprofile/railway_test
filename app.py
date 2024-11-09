@@ -76,7 +76,6 @@ elif authentication_status:
 
     # Doc Intelligence Section
     if selected == 'Doc Intelligence':
-        st.title("Document Intelligence with OCR")
         from transformers import pipeline, AutoModelForSequenceClassification, AutoTokenizer
         
         # Load the model and tokenizer from Hugging Face Hub
