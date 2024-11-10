@@ -72,6 +72,25 @@ elif authentication_status:
             default_index=0
         )
 
+
+            st.divider()  # Optional: Divider for visual separation
+    
+        # New menu for additional modules
+        st.header("AI Modules")
+        selected_module = option_menu(
+            'Modules',
+            [
+                "AI-based GIS From Images to GeoTiff",
+                "AI + BIM - from BIM to 4D schedule",
+                "3D pointclouds – AI for Digital Twins",
+                "AI-Enhanced Drone Mapping - Lidar"
+            ],
+            menu_icon='layers',
+            icons=['map', 'calendar', 'cube', 'airplane'],
+            default_index=0
+        )
+
+    
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
 
