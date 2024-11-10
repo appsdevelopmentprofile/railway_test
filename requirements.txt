@@ -1,4 +1,4 @@
-tf-keras
+tf-keras-vis
 streamlit
 python-multipart
 streamlit-option-menu
