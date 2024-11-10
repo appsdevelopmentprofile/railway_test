@@ -79,7 +79,6 @@ elif authentication_status:
         )
 
         # New menu for additional modules
-        st.header("AI Modules")
         selected_module = option_menu(
             'Modules',
             [
