@@ -517,10 +517,12 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-
+    # If no module is selected, display content from the 'selected' menu
+    if not selected:
+        st.title(f"Selected Application: {modules}")
 
     # Module 1: AI-based GIS - From Images to GeoTiff
-    elif modules == "AI-based GIS - From Images to GeoTiff":
+    if modules == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
         uploaded_file = st.file_uploader("Upload a .tfw GeoTiff", type="tfw")
     
