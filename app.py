@@ -512,3 +512,76 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
+
+
+    # Module 1: AI-based GIS - From Images to GeoTiff
+    if module == "AI-based GIS - From Images to GeoTiff":
+        st.header("AI-based GIS - GeoTiff Segmentation")
+        uploaded_file = st.file_uploader("Upload a .tfw GeoTiff", type="tfw")
+    
+        if uploaded_file is not None:
+            with rasterio.open(uploaded_file) as src:
+                image = src.read([1, 2, 3])  # RGB channels
+                image = np.moveaxis(image, 0, -1)
+                st.image(image, caption="Uploaded Orthophoto", use_column_width=True)
+    
+                # Apply segmentation
+                st.write("Applying segmentation with DeepLabV3...")
+                segmenter = pipeline("image-segmentation", model="huggingface/deeplabv3")
+                segmented_image = segmenter(image)
+                st.image(segmented_image, caption="Segmented Output", use_column_width=True)
+    
+    # Module 2: AI + BIM - From BIM to 4D Schedule
+    elif module == "AI + BIM - From BIM to 4D Schedule":
+        st.header("AI + BIM - 4D Schedule Automation with Point Cloud Data")
+        uploaded_file = st.file_uploader("Upload a .las file", type="las")
+    
+        if uploaded_file is not None:
+            pcd = o3d.io.read_point_cloud(uploaded_file.name)
+            st.write("Loaded Point Cloud Data")
+            
+            # Display 3D model in Streamlit
+            o3d.visualization.draw_geometries([pcd], width=700, height=500)
+    
+            # Run PointNet classification on point cloud data
+            classifier = pipeline("point-cloud-classification", model="huggingface/pointnet")
+            results = classifier(pcd)
+            st.write("Classification Results:", results)
+    
+    # Module 3: 3D Point Clouds - AI for Digital Twins
+    elif module == "3D Point Clouds - AI for Digital Twins":
+        st.header("3D Point Clouds - Digital Twin with PointCNN")
+        uploaded_file = st.file_uploader("Upload a .las file for Digital Twin", type="las")
+    
+        if uploaded_file is not None:
+            pcd = o3d.io.read_point_cloud(uploaded_file.name)
+            st.write("Displaying 3D Point Cloud")
+    
+            # Visualize 3D point cloud
+            o3d.visualization.draw_geometries([pcd])
+    
+            # Run PointCNN for classification
+            classifier = pipeline("point-cloud-classification", model="huggingface/pointcnn")
+            results = classifier(pcd)
+            st.write("Digital Twin Classification Results:", results)
+    
+    # Module 4: AI-Enhanced Drone Mapping - LiDAR
+    elif module == "AI-Enhanced Drone Mapping - LiDAR":
+        st.header("AI-Enhanced Drone Mapping - LiDAR with VoxelNet")
+        uploaded_file = st.file_uploader("Upload a .las file for Drone Mapping", type="las")
+    
+        if uploaded_file is not None:
+            las = laspy.read(uploaded_file)
+            coords = np.vstack((las.x, las.y, las.z)).T
+            st.write("LiDAR Points Loaded")
+    
+            # Plot LiDAR points in 2D for elevation changes
+            fig, ax = plt.subplots()
+            scatter = ax.scatter(coords[:, 0], coords[:, 1], c=coords[:, 2], cmap="viridis", s=1)
+            plt.colorbar(scatter, ax=ax, label="Elevation")
+            st.pyplot(fig)
+    
+            # Detect objects in point cloud with VoxelNet
+            detector = pipeline("object-detection", model="huggingface/voxelnet")
+            results = detector(coords)
+            st.write("Detected Objects:", results)
