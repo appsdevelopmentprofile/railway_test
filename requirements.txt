@@ -1,4 +1,4 @@
-tensorflow>=2.0.0
+tensorflow
 tf-keras
 streamlit
 python-multipart
