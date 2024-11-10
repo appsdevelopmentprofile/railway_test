@@ -520,7 +520,7 @@ elif authentication_status:
 
 
     # Module 1: AI-based GIS - From Images to GeoTiff
-    elif selected == "AI-based GIS - From Images to GeoTiff":
+    elif modules == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
         uploaded_file = st.file_uploader("Upload a .tfw GeoTiff", type="tfw")
     
@@ -537,7 +537,7 @@ elif authentication_status:
                 st.image(segmented_image, caption="Segmented Output", use_column_width=True)
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
-    elif selected == "AI + BIM - From BIM to 4D Schedule":
+    elif modules == "AI + BIM - From BIM to 4D Schedule":
         st.header("AI + BIM - 4D Schedule Automation with Point Cloud Data")
         uploaded_file = st.file_uploader("Upload a .las file", type="las")
     
@@ -558,7 +558,7 @@ elif authentication_status:
             st.write("Classification Results:", results)
     
     # Module 3: 3D Point Clouds - AI for Digital Twins
-    elif selected == "3D Point Clouds - AI for Digital Twins":
+    elif modules == "3D Point Clouds - AI for Digital Twins":
         st.header("3D Point Clouds - Digital Twin with PointCNN")
         uploaded_file = st.file_uploader("Upload a .las file for Digital Twin", type="las")
     
@@ -579,7 +579,7 @@ elif authentication_status:
             st.write("Digital Twin Classification Results:", results)
     
     # Module 4: AI-Enhanced Drone Mapping - LiDAR
-    elif selected == "AI-Enhanced Drone Mapping - LiDAR":
+    elif modules == "AI-Enhanced Drone Mapping - LiDAR":
         st.header("AI-Enhanced Drone Mapping - LiDAR with VoxelNet")
         uploaded_file = st.file_uploader("Upload a .las file for Drone Mapping", type="las")
     
