@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
 from transformers import BertTokenizerFast, TFBertForSequenceClassification, pipeline
-import open3d as o3d
+import pyvista as pv
 import laspy
 import rasterio
 
@@ -541,15 +541,19 @@ elif authentication_status:
         uploaded_file = st.file_uploader("Upload a .las file", type="las")
     
         if uploaded_file is not None:
-            pcd = o3d.io.read_point_cloud(uploaded_file.name)
-            st.write("Loaded Point Cloud Data")
+            las_data = laspy.read(uploaded_file)
+            coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
+            cloud = pv.PolyData(coords)
             
-            # Display 3D model in Streamlit
-            o3d.visualization.draw_geometries([pcd], width=700, height=500)
+            # Display 3D point cloud in Streamlit
+            plotter = pv.Plotter(window_size=(700, 500))
+            plotter.add_mesh(cloud, color="white", point_size=1)
+            plotter.set_background("black")
+            st.pyvista_chart(plotter)
     
             # Run PointNet classification on point cloud data
             classifier = pipeline("point-cloud-classification", model="huggingface/pointnet")
-            results = classifier(pcd)
+            results = classifier(coords)
             st.write("Classification Results:", results)
     
     # Module 3: 3D Point Clouds - AI for Digital Twins
@@ -558,15 +562,19 @@ elif authentication_status:
         uploaded_file = st.file_uploader("Upload a .las file for Digital Twin", type="las")
     
         if uploaded_file is not None:
-            pcd = o3d.io.read_point_cloud(uploaded_file.name)
-            st.write("Displaying 3D Point Cloud")
+            las_data = laspy.read(uploaded_file)
+            coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
+            cloud = pv.PolyData(coords)
     
-            # Visualize 3D point cloud
-            o3d.visualization.draw_geometries([pcd])
+            # Display 3D point cloud in Streamlit
+            plotter = pv.Plotter()
+            plotter.add_mesh(cloud, color="cyan", point_size=1)
+            plotter.set_background("gray")
+            st.pyvista_chart(plotter)
     
             # Run PointCNN for classification
             classifier = pipeline("point-cloud-classification", model="huggingface/pointcnn")
-            results = classifier(pcd)
+            results = classifier(coords)
             st.write("Digital Twin Classification Results:", results)
     
     # Module 4: AI-Enhanced Drone Mapping - LiDAR
@@ -575,8 +583,8 @@ elif authentication_status:
         uploaded_file = st.file_uploader("Upload a .las file for Drone Mapping", type="las")
     
         if uploaded_file is not None:
-            las = laspy.read(uploaded_file)
-            coords = np.vstack((las.x, las.y, las.z)).T
+            las_data = laspy.read(uploaded_file)
+            coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
             st.write("LiDAR Points Loaded")
     
             # Plot LiDAR points in 2D for elevation changes
