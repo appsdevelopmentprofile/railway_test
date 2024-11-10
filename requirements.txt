@@ -30,4 +30,4 @@ tqdm
 tensorflow_hub
 open3d
 pyntcloud
-upgrade pip
+pip>=24.3.1
