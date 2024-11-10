@@ -26,6 +26,9 @@ from rasterio.plot import show
 import tensorflow_hub as hub
 from tensorflow.keras.preprocessing.image import img_to_array
 import io
+import open3d as o3d
+import pyntcloud
+
 
 
 # --- Set page configuration ---
@@ -508,317 +511,220 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-# Module 1: AI-based GIS - From Images to GeoTiff
-    elif selected == "AI-based GIS From Images to GeoTiff":
-        st.header("AI-based GIS - GeoTiff Segmentation")
-    
-        # Function to load and process GeoTIFF file
-        def load_geotiff(uploaded_file):
-            with rasterio.open(uploaded_file) as src:
-                image = src.read([1, 2, 3])  # Read RGB bands
-                image = np.moveaxis(image, 0, -1)  # Reorder axes to (height, width, channels)
-                image = np.clip(image, 0, 255).astype(np.uint8)  # Ensure image is within RGB range
-            return image
-    
-        # Function to segment the image using DeepLabV3 from TensorFlow Hub
-        def segment_image(image):
-            # Load DeepLabV3 pre-trained model from TensorFlow Hub
-            deeplab_model = hub.load("https://tfhub.dev/tensorflow/deeplabv3/1")
-    
-            # Preprocess image for DeepLabV3 input
-            img = Image.fromarray(image)
-            img = img.resize((256, 256))  # Resize to model input size
-            img = img_to_array(img)  # Convert to array
-            img = np.expand_dims(img, axis=0)  # Add batch dimension
-            img = img / 255.0  # Normalize image
-    
-            # Perform segmentation
-            pred = deeplab_model(img)  # Predict segmentation mask
-            pred = np.argmax(pred, axis=-1)[0]  # Get the most probable class for each pixel
-            return pred
-    
-        # Streamlit interface
-        def app():
-            st.title("AI-Based GIS - GeoTIFF Raster Segmentation")
-    
-            st.write("""
-                Upload a GeoTIFF orthophoto to visualize and apply AI-based segmentation.
-                This tool allows you to apply DeepLabV3 segmentation on your geospatial data.
-                Please upload a GeoTIFF file and click 'Segment Image' to view the results.
-            """)
-    
-            # File upload with a progress bar
-            uploaded_file = st.file_uploader("Choose a GeoTIFF file", type=["tif", "tiff"])
-            
-            if uploaded_file is not None:
-                # Display the uploaded GeoTIFF image
-                st.subheader("Uploaded GeoTIFF Image")
-                image = load_geotiff(uploaded_file)
-                st.image(image, caption="Uploaded GeoTIFF Image", use_column_width=True)
-    
-                # Display a processing message
-                st.info("The image is being processed. This might take a few moments depending on the file size.")
-    
-                # Progress bar for the segmentation process
-                with st.spinner("Processing..."):
-                    st.progress(0)  # Initial progress (0%)
-                    # Apply segmentation after a slight delay
-                    segmented_image = segment_image(image)
-                    for i in range(1, 101, 20):
-                        st.progress(i)  # Update progress bar
-                    st.success("Segmentation completed!")
-    
-                # Display the segmented image result
-                st.subheader("Segmented Image")
-                st.image(segmented_image, caption="Segmented Image", use_column_width=True, clamp=True)
-    
-                # Additional information about the segmentation process
-                st.write("""
-                    The segmentation process has classified different regions in the orthophoto.
-                    You can now analyze the segmented image for various features or further refine the analysis.
-                """)
-    
-        if __name__ == "__main__":
-            app()
+
+
+
+
+
+
 
 
     
-    # Module 2: AI + BIM - From BIM to 4D Schedule
-    # Module: AI + BIM - 4D Schedule with PyVista & PointNet
-    elif selected == "AI + BIM - 4D Schedule":
-        st.header("AI + BIM - 4D Schedule: Classify and Visualize 3D Point Clouds")
-    
-        # Function to load and process 3D Point Cloud (PLY, XYZ, etc.)
-        def load_point_cloud(uploaded_file):
-            if uploaded_file is not None:
-                file_path = '/tmp/uploaded_point_cloud.ply'
-                with open(file_path, "wb") as f:
-                    f.write(uploaded_file.read())
-                point_cloud = pv.read(file_path)
-                return point_cloud
-            return None
-    
-        # Function to classify point cloud using a pre-trained PointNet model
-        def classify_point_cloud(pcd):
-            # Load PointNet pre-trained model from TensorFlow Hub or a custom model
-            model_url = "https://tfhub.dev/google/pointnet/1"
-            pointnet_model = hub.load(model_url)
-            
-            # Convert point cloud to numpy array
-            points = np.asarray(pcd.points)
-            
-            # PointNet input requires (N, 3) point cloud array
-            points = np.expand_dims(points, axis=0)  # Adding batch dimension
-            
-            # Preprocess points (normalize or other steps as per model requirements)
-            points = points / np.max(np.abs(points), axis=1, keepdims=True)  # Normalize
-            
-            # Run the PointNet model
-            predictions = pointnet_model(points)
-            return predictions
-    
-        # Function to visualize point cloud using PyVista
-        def visualize_point_cloud(pcd):
-            # Create a PyVista plotter object
-            plotter = pv.Plotter()
-            plotter.add_mesh(pcd, color="lightblue", show_edges=True)
-            plotter.add_axes()
-            plotter.show()
-    
-        # Streamlit interface
-        def app():
-            st.title("AI + BIM - 4D Schedule: Classify and Visualize 3D Point Clouds")
-    
-            st.write("""
-                Upload a 3D point cloud for BIM classification and visualization. 
-                You can classify the point cloud using a PointNet model and see the result in 3D.
-            """)
-    
-            # Upload file with point cloud
-            uploaded_file = st.file_uploader("Choose a 3D Point Cloud file (PLY, XYZ, etc.)", type=["ply", "xyz", "pcd"])
-    
-            if uploaded_file is not None:
-                # Load and display the 3D point cloud
-                pcd = load_point_cloud(uploaded_file)
-                st.write("Point Cloud Loaded Successfully")
-                st.write(f"Point Cloud with {len(pcd.points)} points loaded.")
-    
-                # Display point cloud in 3D using PyVista
-                st.subheader("3D Point Cloud Visualization")
-                st.text("This will open a 3D view of your point cloud (use mouse to rotate).")
-                visualize_point_cloud(pcd)
-                
-                # Button to classify the point cloud
-                if st.button("Classify Point Cloud"):
-                    with st.spinner("Classifying..."):
-                        predictions = classify_point_cloud(pcd)
-                        st.success("Classification completed!")
-    
-                    # Display classification results
-                    st.subheader("Classification Results")
-                    st.write(predictions)  # Assuming classification provides some kind of result
-                    st.text("Classified labels for each point (or overall classification).")
-    
-                # Option for 4D scheduling (e.g., tasks for BIM)
-                st.subheader("4D Scheduling")
-                st.write("""
-                    The following section allows you to add tasks for BIM based on the 3D point cloud.
-                    You can define tasks like 'Modeling,' 'Construction,' etc., and associate them with time intervals.
-                """)
-                
-                task_name = st.text_input("Task Name", "Modeling")
-                task_start = st.date_input("Start Date")
-                task_end = st.date_input("End Date")
-                
-                if st.button("Add Task"):
-                    st.write(f"Task '{task_name}' scheduled from {task_start} to {task_end}.")
-    
-        if __name__ == "__main__":
-            app()
-    
-    # Module 3: 3D Point Clouds - AI for Digital Twins
-# Title of the app
-     elif selected == "3D Point Clouds – AI for Digital Twins":
-        import open3d as o3d
-        import pdal
-        import pyntcloud
-        import numpy as np
-        import pyvista as pv
-        from transformers import pipeline
-        import matplotlib.pyplot as plt
-        import laspy
-        st.header("AI-based Surveying Tool for Digital Twins")
 
-        # Sidebar for uploading point cloud data
-        st.sidebar.header("Upload Point Cloud Data")
-        uploaded_file = st.sidebar.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
-        
-        # Option for AI Model Selection
-        model_select = st.sidebar.selectbox(
-            "Choose AI Model for Point Cloud Classification",
-            ["PointCNN", "DGCNN", "SCAN"]
-        )
-        
-        # Function to visualize point cloud using Open3D
-        def visualize_point_cloud(coords):
-            st.write("### Visualizing Point Cloud")
-            pcd = o3d.geometry.PointCloud()
-            pcd.points = o3d.utility.Vector3dVector(coords)
-            st.write("Open3D 3D Visualization:")
-            o3d.visualization.draw_geometries([pcd])
-        
-        # Function to process and visualize LiDAR data using PDAL
-        def process_lidar_data(uploaded_file):
-            # Process the .las file using PDAL
-            pipeline = pdal.Pipeline("""
+
+# Function to load and process GeoTIFF file
+def load_geotiff(uploaded_file):
+    with rasterio.open(uploaded_file) as src:
+        image = src.read([1, 2, 3])  # Read RGB bands
+        image = np.moveaxis(image, 0, -1)  # Reorder axes to (height, width, channels)
+        image = np.clip(image, 0, 255).astype(np.uint8)  # Ensure image is within RGB range
+    return image
+
+# Function to segment the image using DeepLabV3 from TensorFlow Hub
+def segment_image(image):
+    # Load DeepLabV3 pre-trained model from TensorFlow Hub
+    deeplab_model = hub.load("https://tfhub.dev/tensorflow/deeplabv3/1")
+
+    # Preprocess image for DeepLabV3 input
+    img = Image.fromarray(image)
+    img = img.resize((256, 256))  # Resize to model input size
+    img = img_to_array(img)  # Convert to array
+    img = np.expand_dims(img, axis=0)  # Add batch dimension
+    img = img / 255.0  # Normalize image
+
+    # Perform segmentation
+    pred = deeplab_model(img)  # Predict segmentation mask
+    pred = np.argmax(pred, axis=-1)[0]  # Get the most probable class for each pixel
+    return pred
+
+# Function to load and process 3D Point Cloud (PLY, XYZ, etc.)
+def load_point_cloud(uploaded_file):
+    if uploaded_file is not None:
+        file_path = '/tmp/uploaded_point_cloud.ply'
+        with open(file_path, "wb") as f:
+            f.write(uploaded_file.read())
+        point_cloud = pv.read(file_path)
+        return point_cloud
+    return None
+
+# Function to classify point cloud using a pre-trained PointNet model
+def classify_point_cloud(pcd):
+    model_url = "https://tfhub.dev/google/pointnet/1"
+    pointnet_model = hub.load(model_url)
+
+    # Convert point cloud to numpy array
+    points = np.asarray(pcd.points)
+
+    # PointNet input requires (N, 3) point cloud array
+    points = np.expand_dims(points, axis=0)  # Adding batch dimension
+
+    # Preprocess points (normalize or other steps as per model requirements)
+    points = points / np.max(np.abs(points), axis=1, keepdims=True)  # Normalize
+
+    # Run the PointNet model
+    predictions = pointnet_model(points)
+    return predictions
+
+# Function to visualize point cloud using Open3D
+def visualize_point_cloud(coords):
+    st.write("### Visualizing Point Cloud")
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(coords)
+    st.write("Open3D 3D Visualization:")
+    o3d.visualization.draw_geometries([pcd])
+
+# Function to process LiDAR data using PDAL
+def process_lidar_data(uploaded_file):
+    # Process the .las file using PDAL
+    pipeline = pdal.Pipeline("""
+    {
+        "pipeline": [
+            "%s",
             {
-                "pipeline": [
-                    "%s",
-                    {
-                        "type": "filters.range",
-                        "limits": "Classification[2:2]"
-                    }
-                ]
+                "type": "filters.range",
+                "limits": "Classification[2:2]"
             }
-            """ % uploaded_file.name)
-            pipeline.execute()
-            arrays = pipeline.arrays
-            return arrays[0]  # Return processed point cloud data
-        
-        # Function to classify point cloud using AI model
-        def classify_point_cloud(coords, model_select):
-            st.write(f"### Classifying with {model_select}")
-            classifier = pipeline("point-cloud-classification", model=f"huggingface/{model_select.lower()}")
-            results = classifier(coords)
-            st.write("Classification Results:", results)
-        
-        # Function to plot classification results
-        def plot_classification_results(coords, results):
-            st.write("### Visualizing Classification Results")
-            # Visualize results by coloring according to classification
-            unique_labels = np.unique(results['labels'])
-            color_map = plt.cm.get_cmap('tab10', len(unique_labels))
-            for i, label in enumerate(unique_labels):
-                color = color_map(i)[:3]  # Extract RGB color
-                points = coords[results['labels'] == label]
-                pcd = o3d.geometry.PointCloud()
-                pcd.points = o3d.utility.Vector3dVector(points)
-                pcd.paint_uniform_color(color)
-                o3d.visualization.draw_geometries([pcd])
-        
-        # Check if file is uploaded
+        ]
+    }
+    """ % uploaded_file.name)
+    pipeline.execute()
+    arrays = pipeline.arrays
+    return arrays[0]  # Return processed point cloud data
+
+# Function to plot classification results
+def plot_classification_results(coords, results):
+    st.write("### Visualizing Classification Results")
+    # Visualize results by coloring according to classification
+    unique_labels = np.unique(results['labels'])
+    colors = plt.cm.rainbow(np.linspace(0, 1, len(unique_labels)))
+    label_colors = [colors[label] for label in results['labels']]
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(coords[:, 0], coords[:, 1], coords[:, 2], c=label_colors)
+    st.pyplot(fig)
+
+# Streamlit interface
+def app():
+    st.title("Unified AI + BIM + GIS + Digital Twins")
+
+    st.write("""
+        Welcome to the Unified AI, BIM, GIS, and Digital Twins tool.
+        This tool allows you to perform the following tasks:
+        1. GIS: Segment GeoTIFF images using AI models (e.g., DeepLabV3).
+        2. BIM: Visualize 3D point clouds and perform classification using AI models like PointNet.
+        3. Digital Twins: Analyze and visualize LiDAR data for Digital Twin applications.
+    """)
+
+    # Sidebar for selecting sections
+    selected = st.sidebar.selectbox("Select a section", 
+                                    ["AI-based GIS From Images to GeoTiff", 
+                                     "AI + BIM - from BIM to 4D schedule", 
+                                     "3D Point Clouds – AI for Digital Twins", 
+                                     "AI-Enhanced Drone Mapping - LiDAR"])
+
+    if selected == "AI-based GIS From Images to GeoTiff":
+        # AI-based GIS From Images to GeoTiff Section
+        st.subheader("GeoTIFF Image Segmentation")
+
+        uploaded_file = st.file_uploader("Choose a GeoTIFF file", type=["tif", "tiff"])
+
         if uploaded_file is not None:
-            if uploaded_file.type == "application/las":
-                las_data = laspy.read(uploaded_file)
-                coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
-            else:
-                # Read point cloud using PyntCloud
+            # Display the uploaded GeoTIFF image
+            image = load_geotiff(uploaded_file)
+            st.image(image, caption="Uploaded GeoTIFF Image", use_column_width=True)
+
+            # Process the image
+            st.info("Processing the image...")
+            segmented_image = segment_image(image)
+            st.success("Segmentation completed!")
+
+            # Display the segmented image
+            st.subheader("Segmented Image")
+            st.image(segmented_image, caption="Segmented Image", use_column_width=True)
+
+    elif selected == "AI + BIM - from BIM to 4D schedule":
+        # AI + BIM - from BIM to 4D schedule Section
+        st.subheader("BIM 4D Scheduling")
+
+        uploaded_file = st.file_uploader("Choose a 3D Point Cloud file (PLY, XYZ, etc.)", type=["ply", "xyz", "pcd"])
+
+        if uploaded_file is not None:
+            # Load and display the 3D point cloud
+            pcd = load_point_cloud(uploaded_file)
+            st.write("Point Cloud Loaded Successfully")
+            st.write(f"Point Cloud with {len(pcd.points)} points loaded.")
+
+            # Visualize the point cloud
+            st.subheader("3D Point Cloud Visualization")
+            visualize_point_cloud(pcd)
+
+            # Button to classify the point cloud
+            if st.button("Classify Point Cloud"):
+                with st.spinner("Classifying..."):
+                    predictions = classify_point_cloud(pcd)
+                    st.success("Classification completed!")
+
+                # Display classification results
+                st.subheader("Classification Results")
+                st.write(predictions)
+
+            # 4D scheduling feature
+            st.subheader("4D Scheduling")
+            task_name = st.text_input("Task Name", "Modeling")
+            task_start = st.date_input("Start Date")
+            task_end = st.date_input("End Date")
+
+            if st.button("Add Task"):
+                st.write(f"Task '{task_name}' scheduled from {task_start} to {task_end}.")
+
+    elif selected == "3D Point Clouds – AI for Digital Twins":
+        # 3D Point Clouds – AI for Digital Twins Section
+        st.subheader("Classify 3D Point Cloud")
+
+        uploaded_file = st.file_uploader("Choose a 3D Point Cloud file (PLY, XYZ, etc.)", type=["ply", "xyz", "pcd"])
+
+        if uploaded_file is not None:
+            # Load the point cloud file
+            if uploaded_file.name.endswith(".las"):
+                las = laspy.read(uploaded_file)
+                coords = np.vstack([las.x, las.y, las.z]).transpose()
+
+            elif uploaded_file.name.endswith(".ply") or uploaded_file.name.endswith(".pcd"):
                 cloud = pyntcloud.PyntCloud.from_file(uploaded_file)
-                coords = cloud.points[["x", "y", "z"]].to_numpy()
-        
-            # Show the raw point cloud
-            st.write("### Raw Point Cloud Data (First 100 Points)")
-            st.write(coords[:100])
-        
-            # Visualize point cloud
+                coords = cloud.points[["x", "y", "z"]].values
+
+            # Visualize the point cloud
             visualize_point_cloud(coords)
-        
-            # Process point cloud with selected model
-            classify_point_cloud(coords, model_select)
-        
-            # Plot classification results
-            plot_classification_results(coords, results)
-        
-        else:
-            st.write("Please upload a point cloud file to get started.")
-    
-    # Module 4: AI-Enhanced Drone Mapping - LiDAR
+
+            # Classify the point cloud
+            st.write("Classifying the point cloud...")
+            classify_point_cloud(coords, model_select="PointCNN")
+
     elif selected == "AI-Enhanced Drone Mapping - LiDAR":
-        import streamlit as st
-        import laspy
-        import numpy as np
-        import pyvista as pv
-        from transformers import pipeline
-        import matplotlib.pyplot as plt
-        
-        # Title of the app
-        st.title("AI-Enhanced Drone Mapping - LiDAR")
-        
-        # Sidebar for selecting the model
-        st.sidebar.header("Select Model")
-        model_select = st.sidebar.selectbox("Choose AI Model for LiDAR Detection", ["VoxelNet"])
-        
-        # Upload LiDAR file
-        uploaded_file = st.file_uploader("Upload a .las LiDAR file", type="las")
-        
+        # AI-Enhanced Drone Mapping - LiDAR Section
+        st.subheader("AI for Digital Twins - LiDAR Data Processing")
+
+        uploaded_file = st.file_uploader("Choose a .las or .ply LiDAR file", type=["las", "ply"])
+
         if uploaded_file is not None:
-            # Read LiDAR file using laspy
-            las_data = laspy.read(uploaded_file)
-            coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
-            st.write("LiDAR Data Loaded: ", len(coords), "points")
-        
-            # Display LiDAR points in 2D (Elevation Plot)
-            fig, ax = plt.subplots()
-            scatter = ax.scatter(coords[:, 0], coords[:, 1], c=coords[:, 2], cmap="viridis", s=1)
-            plt.colorbar(scatter, ax=ax, label="Elevation")
-            st.pyplot(fig)
-        
-            # 3D Visualization using PyVista
-            cloud = pv.PolyData(coords)
-            plotter = pv.Plotter(window_size=(800, 600))
-            plotter.add_mesh(cloud, color="cyan", point_size=1)
-            plotter.set_background("black")
-            st.pyvista_chart(plotter)
-        
-            # Run VoxelNet for LiDAR object detection (from Hugging Face)
-            st.write("Running Object Detection with VoxelNet...")
-            detector = pipeline("object-detection", model="huggingface/voxelnet")
-            detection_results = detector(coords)
-        
-            # Display the detection results
-            st.write("Detected Objects:")
-            for result in detection_results:
-                st.write(f"Class: {result['label']}, Confidence: {result['score']:.2f}")
-                st.write(f"Bounding Box: {result['bbox']}")
+            st.write("Processing LiDAR data...")
+            if uploaded_file.name.endswith(".las"):
+                las = laspy.read(uploaded_file)
+                coords = np.vstack([las.x, las.y, las.z]).transpose()
+            else:
+                cloud = pyntcloud.PyntCloud.from_file(uploaded_file)
+                coords = cloud.points[["x", "y", "z"]].values
 
-
+            st.write(f"LiDAR Data with {len(coords)} points loaded.")
+            plot_classification_results(coords, results
