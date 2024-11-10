@@ -21,7 +21,7 @@ openpyxl
 plotly
 huggingface_hub
 transformers
-open3d>=0.18.0
+pyvista
 laspy
 rasterio
 torch
