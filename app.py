@@ -584,25 +584,97 @@ elif authentication_status:
 
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
-    elif selected == "AI + BIM - From BIM to 4D Schedule":
-        st.header("AI + BIM - 4D Schedule Automation with Point Cloud Data")
-        uploaded_file = st.file_uploader("Upload a .las file", type="las")
+    # Module: AI + BIM - 4D Schedule with PyVista & PointNet
+    elif selected == "AI + BIM - 4D Schedule":
+        st.header("AI + BIM - 4D Schedule: Classify and Visualize 3D Point Clouds")
     
-        if uploaded_file is not None:
-            las_data = laspy.read(uploaded_file)
-            coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
-            cloud = pv.PolyData(coords)
+        # Function to load and process 3D Point Cloud (PLY, XYZ, etc.)
+        def load_point_cloud(uploaded_file):
+            if uploaded_file is not None:
+                file_path = '/tmp/uploaded_point_cloud.ply'
+                with open(file_path, "wb") as f:
+                    f.write(uploaded_file.read())
+                point_cloud = pv.read(file_path)
+                return point_cloud
+            return None
+    
+        # Function to classify point cloud using a pre-trained PointNet model
+        def classify_point_cloud(pcd):
+            # Load PointNet pre-trained model from TensorFlow Hub or a custom model
+            model_url = "https://tfhub.dev/google/pointnet/1"
+            pointnet_model = hub.load(model_url)
             
-            # Display 3D point cloud in Streamlit
-            plotter = pv.Plotter(window_size=(700, 500))
-            plotter.add_mesh(cloud, color="white", point_size=1)
-            plotter.set_background("black")
-            st.pyvista_chart(plotter)
+            # Convert point cloud to numpy array
+            points = np.asarray(pcd.points)
+            
+            # PointNet input requires (N, 3) point cloud array
+            points = np.expand_dims(points, axis=0)  # Adding batch dimension
+            
+            # Preprocess points (normalize or other steps as per model requirements)
+            points = points / np.max(np.abs(points), axis=1, keepdims=True)  # Normalize
+            
+            # Run the PointNet model
+            predictions = pointnet_model(points)
+            return predictions
     
-            # Run PointNet classification on point cloud data
-            classifier = pipeline("point-cloud-classification", model="huggingface/pointnet")
-            results = classifier(coords)
-            st.write("Classification Results:", results)
+        # Function to visualize point cloud using PyVista
+        def visualize_point_cloud(pcd):
+            # Create a PyVista plotter object
+            plotter = pv.Plotter()
+            plotter.add_mesh(pcd, color="lightblue", show_edges=True)
+            plotter.add_axes()
+            plotter.show()
+    
+        # Streamlit interface
+        def app():
+            st.title("AI + BIM - 4D Schedule: Classify and Visualize 3D Point Clouds")
+    
+            st.write("""
+                Upload a 3D point cloud for BIM classification and visualization. 
+                You can classify the point cloud using a PointNet model and see the result in 3D.
+            """)
+    
+            # Upload file with point cloud
+            uploaded_file = st.file_uploader("Choose a 3D Point Cloud file (PLY, XYZ, etc.)", type=["ply", "xyz", "pcd"])
+    
+            if uploaded_file is not None:
+                # Load and display the 3D point cloud
+                pcd = load_point_cloud(uploaded_file)
+                st.write("Point Cloud Loaded Successfully")
+                st.write(f"Point Cloud with {len(pcd.points)} points loaded.")
+    
+                # Display point cloud in 3D using PyVista
+                st.subheader("3D Point Cloud Visualization")
+                st.text("This will open a 3D view of your point cloud (use mouse to rotate).")
+                visualize_point_cloud(pcd)
+                
+                # Button to classify the point cloud
+                if st.button("Classify Point Cloud"):
+                    with st.spinner("Classifying..."):
+                        predictions = classify_point_cloud(pcd)
+                        st.success("Classification completed!")
+    
+                    # Display classification results
+                    st.subheader("Classification Results")
+                    st.write(predictions)  # Assuming classification provides some kind of result
+                    st.text("Classified labels for each point (or overall classification).")
+    
+                # Option for 4D scheduling (e.g., tasks for BIM)
+                st.subheader("4D Scheduling")
+                st.write("""
+                    The following section allows you to add tasks for BIM based on the 3D point cloud.
+                    You can define tasks like 'Modeling,' 'Construction,' etc., and associate them with time intervals.
+                """)
+                
+                task_name = st.text_input("Task Name", "Modeling")
+                task_start = st.date_input("Start Date")
+                task_end = st.date_input("End Date")
+                
+                if st.button("Add Task"):
+                    st.write(f"Task '{task_name}' scheduled from {task_start} to {task_end}.")
+    
+        if __name__ == "__main__":
+            app()
     
     # Module 3: 3D Point Clouds - AI for Digital Twins
     elif selected == "3D Point Clouds – AI for Digital Twins":
