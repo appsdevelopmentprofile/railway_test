@@ -22,6 +22,7 @@ from transformers import BertTokenizerFast, TFBertForSequenceClassification, pip
 import pyvista as pv
 import laspy
 import rasterio
+from rasterio.plot import show
 
 
 # --- Set page configuration ---
@@ -508,13 +509,6 @@ elif authentication_status:
     # Module 1: AI-based GIS - From Images to GeoTiff
     elif selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
-
-        import streamlit as st
-        import rasterio
-        from rasterio.plot import show
-        import matplotlib.pyplot as plt
-        import tensorflow as tf
-        
         # Function to load and visualize the GeoTIFF image
         def load_and_visualize(filepath):
             with rasterio.open(filepath) as src:
