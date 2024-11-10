@@ -518,7 +518,7 @@ elif authentication_status:
             st.success("Report generated successfully! You can download it using the button above.")
 
     # If no module is selected, display content from the 'selected' menu
-    if not selected:
+    elif not selected:
         st.title(f"Selected Application: {modules}")
 
     # Module 1: AI-based GIS - From Images to GeoTiff
