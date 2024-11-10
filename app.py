@@ -23,6 +23,11 @@ import pyvista as pv
 import laspy
 import rasterio
 from rasterio.plot import show
+from tensorflow import keras
+from tensorflow.keras.applications.deeplabv3 import DeepLabV3
+from tensorflow.keras.preprocessing.image import img_to_array
+import io
+
 
 
 # --- Set page configuration ---
@@ -507,47 +512,60 @@ elif authentication_status:
 
 
     # Module 1: AI-based GIS - From Images to GeoTiff
+# Module 1: AI-based GIS - From Images to GeoTiff
     elif selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
-        # Function to load and visualize the GeoTIFF image
+        
+        # Function to load and process GeoTIFF file
+        def load_geotiff(uploaded_file):
+            with rasterio.open(uploaded_file) as src:
+                image = src.read([1, 2, 3])  # Read RGB bands
+                image = np.moveaxis(image, 0, -1)  # Reorder axes to (height, width, channels)
+                image = np.clip(image, 0, 255).astype(np.uint8)  # Ensure image is within RGB range
+            return image
+    
+        # Function to segment the image using DeepLabV3
         def segment_image(image):
-    # Load the DeepLabV3 model
-            model = tf.keras.models.load_model('deeplabv3_model.h5')  # Replace with your model path
+            # Load DeepLabV3 pre-trained model
+            model = DeepLabV3(weights='pascal_voc')
             
-            # Preprocess the image for the model
-            preprocessed_image = tf.image.resize(image, (224, 224))  # Resize to model input size
-            preprocessed_image = preprocessed_image / 255.0  # Normalize pixel values to [0, 1]
-            preprocessed_image = tf.expand_dims(preprocessed_image, axis=0)  # Add batch dimension
+            # Preprocess image for DeepLabV3 input
+            img = Image.fromarray(image)
+            img = img.resize((256, 256))  # Resize to model input size
+            img = img_to_array(img)  # Convert to array
+            img = np.expand_dims(img, axis=0)  # Add batch dimension
+            img = img / 255.0  # Normalize image
             
             # Perform segmentation
-            prediction = model.predict(preprocessed_image)
+            pred = model.predict(img)  # Predict segmentation mask
+            pred = np.argmax(pred, axis=-1)[0]  # Get the most probable class for each pixel
+            return pred
+        
+        # Streamlit interface
+        def app():
+            st.title("AI-Based GIS - GeoTIFF Raster Segmentation")
             
-            # Post-process the prediction (e.g., convert to class labels)
-            segmented_image = prediction[0]  # Assuming the model output is a single-channel mask
-            return segmented_image
-    
-        def main():
-            st.title("AI-Based GIS: GeoTIFF Segmentation")
+            st.write("Upload a GeoTIFF orthophoto to visualize and apply AI-based segmentation.")
         
-            # File Uploader
-            uploaded_file = st.file_uploader("Upload a GeoTIFF file", type=["tif"])
-        
+            # Upload file
+            uploaded_file = st.file_uploader("Choose a GeoTIFF file", type=["tif", "tiff"])
+            
             if uploaded_file is not None:
-                # Read the image using rasterio
-                with rasterio.open(uploaded_file) as src:
-                    image = src.read(1)  # Read the first band (assuming single band image)
-        
-                # Display the image
-                st.image(image, caption="Uploaded Image", use_column_width=True)
-        
-                # Segment the image
-                segmented_image = segment_image(image)
-        
-                # Display the segmented image
-                st.image(segmented_image, caption="Segmented Image", use_column_width=True)
+                # Load and display GeoTIFF image
+                image = load_geotiff(uploaded_file)
+                st.image(image, caption="Uploaded GeoTIFF Image", use_column_width=True)
+                
+                # Segmentation option
+                if st.button("Segment Image"):
+                    # Apply AI-based segmentation using DeepLabV3
+                    segmented_image = segment_image(image)
+                    
+                    # Display segmented result
+                    st.image(segmented_image, caption="Segmented Image", use_column_width=True, clamp=True)
         
         if __name__ == "__main__":
-            main()
+            app()
+
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
     elif selected == "AI + BIM - From BIM to 4D Schedule":
