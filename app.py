@@ -514,12 +514,6 @@ elif authentication_status:
 # Module 1: AI-based GIS - From Images to GeoTiff
     elif selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
-        
-        # Function to load and process GeoTIFF file
-# Module 1: AI-based GIS - From Images to GeoTiff
-elif selected == "AI-based GIS - From Images to GeoTiff":
-        st.header("AI-based GIS - GeoTiff Segmentation")
-    
     # Function to load and process GeoTIFF file
         def load_geotiff(uploaded_file):
             with rasterio.open(uploaded_file) as src:
