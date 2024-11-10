@@ -679,7 +679,7 @@ elif authentication_status:
     # Module 3: 3D Point Clouds - AI for Digital Twins
 # Title of the app
      elif selected == "3D Point Clouds – AI for Digital Twins":
-        st.title("AI-based Surveying Tool for Digital Twins")
+        st.header("AI-based Surveying Tool for Digital Twins")
         
         # Sidebar for uploading point cloud data
         st.sidebar.header("Upload Point Cloud Data")
