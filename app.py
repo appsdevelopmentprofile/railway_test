@@ -66,9 +66,9 @@ elif authentication_status:
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
 
-    # Sidebar navigation
+    # Sidebar
     with st.sidebar:
-        # Main application options
+        # Main application options (selected menu)
         selected = option_menu(
             'RFO Central Application',
             [
@@ -81,17 +81,23 @@ elif authentication_status:
             icons=['file-earmark-text', 'graph-up', 'exclamation-circle', 'clipboard-check'],
             default_index=0
         )
-                'AI Modules',
-                [
-                    "AI-based GIS From Images to GeoTiff",
-                    "AI + BIM - from BIM to 4D schedule",
-                    "3D pointclouds – AI for Digital Twins",
-                    "AI-Enhanced Drone Mapping - Lidar"
-                ],
-                menu_icon='layers',
-                icons=['map', 'calendar', 'cube', 'airplane'],
-                default_index=0
-            )
+        
+        # Divider between the two menus
+        st.divider()
+    
+        # Second menu for AI Modules
+        modules = option_menu(
+            'Modules',
+            [
+                "AI-based GIS From Images to GeoTiff",
+                "AI + BIM - from BIM to 4D schedule",
+                "3D Point Clouds – AI for Digital Twins",
+                "AI-Enhanced Drone Mapping - LiDAR"
+            ],
+            menu_icon='layers',
+            icons=['map', 'calendar', 'cube', 'airplane'],
+            default_index=0
+        )
     
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
@@ -191,7 +197,7 @@ elif authentication_status:
     
     
     # Bring up the page when it is selected on the side bar
-    if selected == 'Predictive Analytics for Operational Planning':
+    elif selected == 'Predictive Analytics for Operational Planning':
         # Importing necessary libraries to make the front end work
         import pandas as pd
         import matplotlib.pyplot as plt
@@ -288,7 +294,7 @@ elif authentication_status:
     ## Module 3 - Automated Field Tech Assistance - Fault Detection
     
     # Bring up the page when it is selected on the sidebar
-    if selected == "Real-Time Fault Monitoring":
+    elif selected == "Real-Time Fault Monitoring":
         # Importing necessary libraries to make the front end work
         import streamlit as st
         import numpy as np
@@ -416,7 +422,7 @@ elif authentication_status:
     # Module 4 - Project Completion Reporting for Oil and Gas
     
     # Bring up the page when it is selecte on the side bar
-    if selected == "Project Completion Reporting":
+    elif selected == "Project Completion Reporting":
     
         import streamlit as st
         import base64
