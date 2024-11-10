@@ -179,11 +179,6 @@ elif authentication_status:
             if st.button('Analyze Document Content'):
                 st.success("Feature extraction and analysis results will be displayed here.")
 
-    # Execute doc_intelligence function
-    if selected == 'Doc Intelligence':
-        doc_intelligence()
-
-
 
  ## Module 2 - Predictive Analytics for Operational Planning
     
