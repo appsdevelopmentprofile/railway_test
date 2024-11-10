@@ -727,4 +727,4 @@ def app():
                 coords = cloud.points[["x", "y", "z"]].values
 
             st.write(f"LiDAR Data with {len(coords)} points loaded.")
-            plot_classification_results(coords, results
+            plot_classification_results(coords, results)
