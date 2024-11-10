@@ -19,6 +19,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.dummy import DummyClassifier  # For demonstration of fault detection
 from transformers import BertTokenizerFast, TFBertForSequenceClassification, pipeline
+import open3d as o3d
+import laspy
+import rasterio
+
 
 # --- Set page configuration ---
 st.set_page_config(
@@ -79,7 +83,7 @@ elif authentication_status:
         )
 
         # New menu for additional modules
-        selected_module = option_menu(
+        module = option_menu(
             'Modules',
             [
                 "AI-based GIS From Images to GeoTiff",
