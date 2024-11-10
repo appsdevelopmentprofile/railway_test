@@ -504,17 +504,6 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-
-
-
-
-
-
-
-
-    
-
-
 # Function to load and process GeoTIFF file
 # Module 1: AI-based GIS - From Images to GeoTiff
     elif selected == "AI-based GIS From Images to GeoTiff":
