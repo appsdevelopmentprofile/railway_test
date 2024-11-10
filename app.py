@@ -33,8 +33,13 @@ usernames = ["rfocentral"]
 
 # Load hashed passwords
 file_path = Path("hashed_pw.pkl")
-with file_path.open("rb") as file:
-    hashed_passwords = pickle.load(file)
+try:
+    with file_path.open("rb") as file:
+        hashed_passwords = pickle.load(file)
+except FileNotFoundError:
+    st.error("Password file not found.")
+except Exception as e:
+    st.error(f"An error occurred while loading passwords: {e}")
 
 authenticator = stauth.Authenticate(
     names, usernames, hashed_passwords, "allnorth_consultants", "rfocentral", cookie_expiry_days=30
@@ -59,6 +64,7 @@ elif authentication_status:
 
     # Sidebar navigation
     with st.sidebar:
+        # Main application options
         selected = option_menu(
             'RFO Central Application',
             [
@@ -72,9 +78,8 @@ elif authentication_status:
             default_index=0
         )
 
-
         st.divider()  # Optional: Divider for visual separation
-    
+
         # New menu for additional modules
         st.header("AI Modules")
         selected_module = option_menu(
