@@ -23,11 +23,10 @@ import pyvista as pv
 import laspy
 import rasterio
 from rasterio.plot import show
-from tensorflow import keras
+import tensorflow_hub as hub
 from tensorflow.keras.applications import DeepLabV3
 from tensorflow.keras.preprocessing.image import img_to_array
 import io
-
 
 
 # --- Set page configuration ---
@@ -517,6 +516,11 @@ elif authentication_status:
         st.header("AI-based GIS - GeoTiff Segmentation")
         
         # Function to load and process GeoTIFF file
+# Module 1: AI-based GIS - From Images to GeoTiff
+elif selected == "AI-based GIS - From Images to GeoTiff":
+        st.header("AI-based GIS - GeoTiff Segmentation")
+    
+    # Function to load and process GeoTIFF file
         def load_geotiff(uploaded_file):
             with rasterio.open(uploaded_file) as src:
                 image = src.read([1, 2, 3])  # Read RGB bands
@@ -524,10 +528,10 @@ elif authentication_status:
                 image = np.clip(image, 0, 255).astype(np.uint8)  # Ensure image is within RGB range
             return image
     
-        # Function to segment the image using DeepLabV3
+        # Function to segment the image using DeepLabV3 from TensorFlow Hub
         def segment_image(image):
-            # Load DeepLabV3 pre-trained model
-            model = DeepLabV3(weights='pascal_voc')
+            # Load DeepLabV3 pre-trained model from TensorFlow Hub
+            deeplab_model = hub.load("https://tfhub.dev/tensorflow/deeplabv3/1")
             
             # Preprocess image for DeepLabV3 input
             img = Image.fromarray(image)
@@ -537,7 +541,7 @@ elif authentication_status:
             img = img / 255.0  # Normalize image
             
             # Perform segmentation
-            pred = model.predict(img)  # Predict segmentation mask
+            pred = deeplab_model(img)  # Predict segmentation mask
             pred = np.argmax(pred, axis=-1)[0]  # Get the most probable class for each pixel
             return pred
         
@@ -557,7 +561,7 @@ elif authentication_status:
                 
                 # Segmentation option
                 if st.button("Segment Image"):
-                    # Apply AI-based segmentation using DeepLabV3
+                    # Apply AI-based segmentation using DeepLabV3 from TensorFlow Hub
                     segmented_image = segment_image(image)
                     
                     # Display segmented result
