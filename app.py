@@ -68,8 +68,7 @@ elif authentication_status:
     # ---- LOGOUT AND GREETING ----
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
-    
-        selected = option_menu(
+    selected = option_menu(
             'RFO Central Application & AI Modules',  # Combined title
             [
                 "Doc Intelligence",
@@ -87,8 +86,8 @@ elif authentication_status:
         )
 
         # Display content based on the selected module
-        st.header(selected)
-        st.write(f"This is the content for {selected} module.")  # Replace with actual content
+    st.header(selected)
+    st.write(f"This is the content for {selected} module.")  # Replace with actual content
     # Split layout into two columns: left for menu, right for chatbot
     col1, col2 = st.columns([2, 1])
 
