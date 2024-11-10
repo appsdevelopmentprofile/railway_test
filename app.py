@@ -73,23 +73,23 @@ elif authentication_status:
 
     # Sidebar
 # Sidebar with a single menu
-    with st.sidebar:
-        selected = option_menu(
-            'RFO Central Application & AI Modules',  # Combined title
-            [
-                "Doc Intelligence",
-                "Predictive Analytics for Operational Planning",
-                "Real-Time Fault Monitoring",
-                "Project Completion Reporting",
-                "AI-based GIS From Images to GeoTiff",
-                "AI + BIM - from BIM to 4D schedule",
-                "3D Point Clouds – AI for Digital Twins",
-                "AI-Enhanced Drone Mapping - LiDAR"
-            ],
-            menu_icon='layers',  # Single menu icon
-            icons=['file-earmark-text', 'graph-up', 'exclamation-circle', 'clipboard-check', 'map', 'calendar', 'cube', 'airplane'],
-            default_index=0
-        )
+        with st.sidebar:
+            selected = option_menu(
+                'RFO Central Application & AI Modules',  # Combined title
+                [
+                    "Doc Intelligence",
+                    "Predictive Analytics for Operational Planning",
+                    "Real-Time Fault Monitoring",
+                    "Project Completion Reporting",
+                    "AI-based GIS From Images to GeoTiff",
+                    "AI + BIM - from BIM to 4D schedule",
+                    "3D Point Clouds – AI for Digital Twins",
+                    "AI-Enhanced Drone Mapping - LiDAR"
+                ],
+                menu_icon='layers',  # Single menu icon
+                icons=['file-earmark-text', 'graph-up', 'exclamation-circle', 'clipboard-check', 'map', 'calendar', 'cube', 'airplane'],
+                default_index=0
+            )
     
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
