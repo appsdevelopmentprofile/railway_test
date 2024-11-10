@@ -24,7 +24,7 @@ import laspy
 import rasterio
 from rasterio.plot import show
 from tensorflow import keras
-from tensorflow.keras.applications import DeepLabV3
+from tensorflow.keras.applications import DeepLabV3+
 from tensorflow.keras.preprocessing.image import img_to_array
 import io
 
