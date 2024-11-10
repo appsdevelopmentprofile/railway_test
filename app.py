@@ -677,25 +677,92 @@ elif authentication_status:
             app()
     
     # Module 3: 3D Point Clouds - AI for Digital Twins
-    elif selected == "3D Point Clouds – AI for Digital Twins":
-        st.header("3D Point Clouds - Digital Twin with PointCNN")
-        uploaded_file = st.file_uploader("Upload a .las file for Digital Twin", type="las")
-    
-        if uploaded_file is not None:
-            las_data = laspy.read(uploaded_file)
-            coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
-            cloud = pv.PolyData(coords)
-    
-            # Display 3D point cloud in Streamlit
-            plotter = pv.Plotter()
-            plotter.add_mesh(cloud, color="cyan", point_size=1)
-            plotter.set_background("gray")
-            st.pyvista_chart(plotter)
-    
-            # Run PointCNN for classification
-            classifier = pipeline("point-cloud-classification", model="huggingface/pointcnn")
+# Title of the app
+     elif selected == "3D Point Clouds – AI for Digital Twins":
+        st.title("AI-based Surveying Tool for Digital Twins")
+        
+        # Sidebar for uploading point cloud data
+        st.sidebar.header("Upload Point Cloud Data")
+        uploaded_file = st.sidebar.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
+        
+        # Option for AI Model Selection
+        model_select = st.sidebar.selectbox(
+            "Choose AI Model for Point Cloud Classification",
+            ["PointCNN", "DGCNN", "SCAN"]
+        )
+        
+        # Function to visualize point cloud using Open3D
+        def visualize_point_cloud(coords):
+            st.write("### Visualizing Point Cloud")
+            pcd = o3d.geometry.PointCloud()
+            pcd.points = o3d.utility.Vector3dVector(coords)
+            st.write("Open3D 3D Visualization:")
+            o3d.visualization.draw_geometries([pcd])
+        
+        # Function to process and visualize LiDAR data using PDAL
+        def process_lidar_data(uploaded_file):
+            # Process the .las file using PDAL
+            pipeline = pdal.Pipeline("""
+            {
+                "pipeline": [
+                    "%s",
+                    {
+                        "type": "filters.range",
+                        "limits": "Classification[2:2]"
+                    }
+                ]
+            }
+            """ % uploaded_file.name)
+            pipeline.execute()
+            arrays = pipeline.arrays
+            return arrays[0]  # Return processed point cloud data
+        
+        # Function to classify point cloud using AI model
+        def classify_point_cloud(coords, model_select):
+            st.write(f"### Classifying with {model_select}")
+            classifier = pipeline("point-cloud-classification", model=f"huggingface/{model_select.lower()}")
             results = classifier(coords)
-            st.write("Digital Twin Classification Results:", results)
+            st.write("Classification Results:", results)
+        
+        # Function to plot classification results
+        def plot_classification_results(coords, results):
+            st.write("### Visualizing Classification Results")
+            # Visualize results by coloring according to classification
+            unique_labels = np.unique(results['labels'])
+            color_map = plt.cm.get_cmap('tab10', len(unique_labels))
+            for i, label in enumerate(unique_labels):
+                color = color_map(i)[:3]  # Extract RGB color
+                points = coords[results['labels'] == label]
+                pcd = o3d.geometry.PointCloud()
+                pcd.points = o3d.utility.Vector3dVector(points)
+                pcd.paint_uniform_color(color)
+                o3d.visualization.draw_geometries([pcd])
+        
+        # Check if file is uploaded
+        if uploaded_file is not None:
+            if uploaded_file.type == "application/las":
+                las_data = laspy.read(uploaded_file)
+                coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
+            else:
+                # Read point cloud using PyntCloud
+                cloud = pyntcloud.PyntCloud.from_file(uploaded_file)
+                coords = cloud.points[["x", "y", "z"]].to_numpy()
+        
+            # Show the raw point cloud
+            st.write("### Raw Point Cloud Data (First 100 Points)")
+            st.write(coords[:100])
+        
+            # Visualize point cloud
+            visualize_point_cloud(coords)
+        
+            # Process point cloud with selected model
+            classify_point_cloud(coords, model_select)
+        
+            # Plot classification results
+            plot_classification_results(coords, results)
+        
+        else:
+            st.write("Please upload a point cloud file to get started.")
     
     # Module 4: AI-Enhanced Drone Mapping - LiDAR
     elif selected == "AI-Enhanced Drone Mapping - LiDAR":
