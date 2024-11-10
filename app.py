@@ -83,8 +83,8 @@ elif authentication_status:
         )
 
         # New menu for additional modules
-        module = option_menu(
-            'Modules',
+        selected = option_menu(
+            'AI Modules',
             [
                 "AI-based GIS From Images to GeoTiff",
                 "AI + BIM - from BIM to 4D schedule",
@@ -519,7 +519,7 @@ elif authentication_status:
 
 
     # Module 1: AI-based GIS - From Images to GeoTiff
-    if module == "AI-based GIS - From Images to GeoTiff":
+    if selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
         uploaded_file = st.file_uploader("Upload a .tfw GeoTiff", type="tfw")
     
