@@ -550,11 +550,6 @@ elif authentication_status:
         
                 # Display the segmented image
                 st.image(segmented_image, caption="Segmented Image")
-        
-        if __name__ == "__main__":
-            main()
-
-    
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
     elif selected == "AI + BIM - From BIM to 4D Schedule":
