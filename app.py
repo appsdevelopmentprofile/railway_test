@@ -605,7 +605,7 @@ elif authentication_status:
             st.write("Classification Results:", results)
     
     # Module 3: 3D Point Clouds - AI for Digital Twins
-    elif selected == "3D Point Clouds - AI for Digital Twins":
+    elif selected == "3D Point Clouds – AI for Digital Twins":
         st.header("3D Point Clouds - Digital Twin with PointCNN")
         uploaded_file = st.file_uploader("Upload a .las file for Digital Twin", type="las")
     
