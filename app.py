@@ -774,21 +774,51 @@ elif authentication_status:
     
     # Module 4: AI-Enhanced Drone Mapping - LiDAR
     elif selected == "AI-Enhanced Drone Mapping - LiDAR":
-        st.header("AI-Enhanced Drone Mapping - LiDAR with VoxelNet")
-        uploaded_file = st.file_uploader("Upload a .las file for Drone Mapping", type="las")
-    
+        import streamlit as st
+        import laspy
+        import numpy as np
+        import pyvista as pv
+        from transformers import pipeline
+        import matplotlib.pyplot as plt
+        
+        # Title of the app
+        st.title("AI-Enhanced Drone Mapping - LiDAR")
+        
+        # Sidebar for selecting the model
+        st.sidebar.header("Select Model")
+        model_select = st.sidebar.selectbox("Choose AI Model for LiDAR Detection", ["VoxelNet"])
+        
+        # Upload LiDAR file
+        uploaded_file = st.file_uploader("Upload a .las LiDAR file", type="las")
+        
         if uploaded_file is not None:
+            # Read LiDAR file using laspy
             las_data = laspy.read(uploaded_file)
             coords = np.vstack((las_data.x, las_data.y, las_data.z)).T
-            st.write("LiDAR Points Loaded")
-    
-            # Plot LiDAR points in 2D for elevation changes
+            st.write("LiDAR Data Loaded: ", len(coords), "points")
+        
+            # Display LiDAR points in 2D (Elevation Plot)
             fig, ax = plt.subplots()
             scatter = ax.scatter(coords[:, 0], coords[:, 1], c=coords[:, 2], cmap="viridis", s=1)
             plt.colorbar(scatter, ax=ax, label="Elevation")
             st.pyplot(fig)
-    
-            # Detect objects in point cloud with VoxelNet
+        
+            # 3D Visualization using PyVista
+            cloud = pv.PolyData(coords)
+            plotter = pv.Plotter(window_size=(800, 600))
+            plotter.add_mesh(cloud, color="cyan", point_size=1)
+            plotter.set_background("black")
+            st.pyvista_chart(plotter)
+        
+            # Run VoxelNet for LiDAR object detection (from Hugging Face)
+            st.write("Running Object Detection with VoxelNet...")
             detector = pipeline("object-detection", model="huggingface/voxelnet")
-            results = detector(coords)
-            st.write("Detected Objects:", results)
+            detection_results = detector(coords)
+        
+            # Display the detection results
+            st.write("Detected Objects:")
+            for result in detection_results:
+                st.write(f"Class: {result['label']}, Confidence: {result['score']:.2f}")
+                st.write(f"Bounding Box: {result['bbox']}")
+
+
