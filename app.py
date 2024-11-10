@@ -78,7 +78,8 @@ elif authentication_status:
             default_index=0
         )
 
-            st.divider()  # Optional: Divider for visual separation
+        # Optional: Divider for visual separation
+        st.divider()
 
         # New menu for additional modules
         st.header("AI Modules")
@@ -94,6 +95,7 @@ elif authentication_status:
             icons=['map', 'calendar', 'cube', 'airplane'],
             default_index=0
         )
+
 
     
     # Create temporary directory if it doesn't exist
