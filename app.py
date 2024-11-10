@@ -672,92 +672,92 @@ elif authentication_status:
                 app()
     
     
-    # Module 3: 3D Point Clouds – AI for Digital Twins
-    elif selected == "3D Point Clouds – AI for Digital Twins":
-        st.header("AI-based Surveying Tool for Digital Twins")
-    
-        # Sidebar for uploading point cloud data
-        st.subheader("Upload Point Cloud Data")
-        uploaded_file = st.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
+        # Module 3: 3D Point Clouds – AI for Digital Twins
+        elif selected == "3D Point Clouds – AI for Digital Twins":
+            st.header("AI-based Surveying Tool for Digital Twins")
         
-        # Option for AI Model Selection
-        model_select = st.selectbox(
-            "Choose AI Model for Point Cloud Classification",
-            ["PointCNN", "DGCNN", "SCAN"]
-        )
-        
-        # Function to process point cloud and visualize using PyVista
-        def visualize_point_cloud(coords):
-            st.write("### Visualizing Point Cloud")
-            cloud = pv.PolyData(coords)
-            plotter = pv.Plotter()
-            plotter.add_mesh(cloud, color="cyan", point_size=5)
-            plotter.set_background("white")
-            plotter.show()
-    
-        # Option to upload point cloud data
-        if uploaded_file is not None:
-            coords = np.loadtxt(uploaded_file)  # Load the data
-            visualize_point_cloud(coords)
+            # Sidebar for uploading point cloud data
+            st.subheader("Upload Point Cloud Data")
+            uploaded_file = st.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
             
-        st.write("AI-based Digital Twin operations")
-        st.text("You can classify and extract features from point clouds here.")
-        
-        
-    # Module 4: AI-Enhanced Drone Mapping - LiDAR
-    elif selected == "AI-Enhanced Drone Mapping - LiDAR":
-        st.header("AI for LiDAR-based Drone Mapping")
-    
-        st.write("""
-            Upload a LiDAR point cloud file to classify and process drone mapping data. 
-            This tool leverages AI-based models to classify ground and non-ground points.
-        """)
-        uploaded_file = st.file_uploader("Upload LiDAR Point Cloud", type=["las", "laz", "ply"])
-    
-        if uploaded_file is not None:
-            coords = np.loadtxt(uploaded_file)  # Load the point cloud data
-            visualize_point_cloud(coords)  # Visualize point cloud with PyVista
-    
-        st.write("Further process LiDAR data for classification or other tasks.")
-
-
-        
-
-    with col2:
-        # --- CHATBOT IN RIGHT COLUMN ---
-        st.subheader("💬 Chatbot")
-        st.caption("🚀 A Streamlit chatbot powered by OpenAI")
-
-        openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-        st.write("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
-        st.write("[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)")
-        st.write("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)")
-
-        if "messages" not in st.session_state:
-            st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
-
-        # Display chat history
-        for msg in st.session_state.messages:
-            st.chat_message(msg["role"]).write(msg["content"])
-
-        # User input
-        if prompt := st.chat_input():
-            if not openai_api_key:
-                st.info("Please add your OpenAI API key to continue.")
-                st.stop()
-
-            # Send user message
-            client = OpenAI(api_key=openai_api_key)
-            st.session_state.messages.append({"role": "user", "content": prompt})
-            st.chat_message("user").write(prompt)
-
-            # Get response from OpenAI
-            response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=st.session_state.messages
+            # Option for AI Model Selection
+            model_select = st.selectbox(
+                "Choose AI Model for Point Cloud Classification",
+                ["PointCNN", "DGCNN", "SCAN"]
             )
-            msg = response.choices[0].message.content
-            st.session_state.messages.append({"role": "assistant", "content": msg})
-            st.chat_message("assistant").write(msg)
-
+            
+            # Function to process point cloud and visualize using PyVista
+            def visualize_point_cloud(coords):
+                st.write("### Visualizing Point Cloud")
+                cloud = pv.PolyData(coords)
+                plotter = pv.Plotter()
+                plotter.add_mesh(cloud, color="cyan", point_size=5)
+                plotter.set_background("white")
+                plotter.show()
+        
+            # Option to upload point cloud data
+            if uploaded_file is not None:
+                coords = np.loadtxt(uploaded_file)  # Load the data
+                visualize_point_cloud(coords)
+                
+            st.write("AI-based Digital Twin operations")
+            st.text("You can classify and extract features from point clouds here.")
+            
+            
+        # Module 4: AI-Enhanced Drone Mapping - LiDAR
+        elif selected == "AI-Enhanced Drone Mapping - LiDAR":
+            st.header("AI for LiDAR-based Drone Mapping")
+        
+            st.write("""
+                Upload a LiDAR point cloud file to classify and process drone mapping data. 
+                This tool leverages AI-based models to classify ground and non-ground points.
+            """)
+            uploaded_file = st.file_uploader("Upload LiDAR Point Cloud", type=["las", "laz", "ply"])
+        
+            if uploaded_file is not None:
+                coords = np.loadtxt(uploaded_file)  # Load the point cloud data
+                visualize_point_cloud(coords)  # Visualize point cloud with PyVista
+        
+            st.write("Further process LiDAR data for classification or other tasks.")
+    
+    
+            
+    
+        with col2:
+            # --- CHATBOT IN RIGHT COLUMN ---
+            st.subheader("💬 Chatbot")
+            st.caption("🚀 A Streamlit chatbot powered by OpenAI")
+    
+            openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+            st.write("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
+            st.write("[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)")
+            st.write("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)")
+    
+            if "messages" not in st.session_state:
+                st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+    
+            # Display chat history
+            for msg in st.session_state.messages:
+                st.chat_message(msg["role"]).write(msg["content"])
+    
+            # User input
+            if prompt := st.chat_input():
+                if not openai_api_key:
+                    st.info("Please add your OpenAI API key to continue.")
+                    st.stop()
+    
+                # Send user message
+                client = OpenAI(api_key=openai_api_key)
+                st.session_state.messages.append({"role": "user", "content": prompt})
+                st.chat_message("user").write(prompt)
+    
+                # Get response from OpenAI
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=st.session_state.messages
+                )
+                msg = response.choices[0].message.content
+                st.session_state.messages.append({"role": "assistant", "content": msg})
+                st.chat_message("assistant").write(msg)
+    
 
