@@ -508,9 +508,8 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-    
-    # Module 1: AI-based GIS - From Images to GeoTiff
-    elif selected == "AI-based GIS - From Images to GeoTiff":
+# Module 1: AI-based GIS - From Images to GeoTiff
+    elif selected == "AI-based GIS From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
     
         # Function to load and process GeoTIFF file
@@ -542,23 +541,42 @@ elif authentication_status:
         def app():
             st.title("AI-Based GIS - GeoTIFF Raster Segmentation")
     
-            st.write("Upload a GeoTIFF orthophoto to visualize and apply AI-based segmentation.")
+            st.write("""
+                Upload a GeoTIFF orthophoto to visualize and apply AI-based segmentation.
+                This tool allows you to apply DeepLabV3 segmentation on your geospatial data.
+                Please upload a GeoTIFF file and click 'Segment Image' to view the results.
+            """)
     
-            # Upload file
+            # File upload with a progress bar
             uploaded_file = st.file_uploader("Choose a GeoTIFF file", type=["tif", "tiff"])
-    
+            
             if uploaded_file is not None:
-                # Load and display GeoTIFF image
+                # Display the uploaded GeoTIFF image
+                st.subheader("Uploaded GeoTIFF Image")
                 image = load_geotiff(uploaded_file)
                 st.image(image, caption="Uploaded GeoTIFF Image", use_column_width=True)
     
-                # Segmentation option
-                if st.button("Segment Image"):
-                    # Apply AI-based segmentation using DeepLabV3 from TensorFlow Hub
-                    segmented_image = segment_image(image)
+                # Display a processing message
+                st.info("The image is being processed. This might take a few moments depending on the file size.")
     
-                    # Display segmented result
-                    st.image(segmented_image, caption="Segmented Image", use_column_width=True, clamp=True)
+                # Progress bar for the segmentation process
+                with st.spinner("Processing..."):
+                    st.progress(0)  # Initial progress (0%)
+                    # Apply segmentation after a slight delay
+                    segmented_image = segment_image(image)
+                    for i in range(1, 101, 20):
+                        st.progress(i)  # Update progress bar
+                    st.success("Segmentation completed!")
+    
+                # Display the segmented image result
+                st.subheader("Segmented Image")
+                st.image(segmented_image, caption="Segmented Image", use_column_width=True, clamp=True)
+    
+                # Additional information about the segmentation process
+                st.write("""
+                    The segmentation process has classified different regions in the orthophoto.
+                    You can now analyze the segmented image for various features or further refine the analysis.
+                """)
     
         if __name__ == "__main__":
             app()
