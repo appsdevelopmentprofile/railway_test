@@ -508,19 +508,59 @@ elif authentication_status:
     # Module 1: AI-based GIS - From Images to GeoTiff
     elif selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
-        uploaded_file = st.file_uploader("Upload a .tfw GeoTiff", type="tfw")
+
+        import streamlit as st
+        import rasterio
+        from rasterio.plot import show
+        import matplotlib.pyplot as plt
+        import tensorflow as tf
+        
+        # Function to load and visualize the GeoTIFF image
+        def load_and_visualize(filepath):
+            with rasterio.open(filepath) as src:
+                image = src.read()
+                show(image)
+        
+        # Function to perform semantic segmentation using DeepLabV3
+        def segment_image(image):
+            # Load the DeepLabV3 model
+            model = tf.keras.models.load_model('deeplabv3_model.h5')  # Replace with your model path
+        
+            # Preprocess the image for the model
+            # ... (Specific preprocessing steps based on your model's requirements)
+        
+            # Perform segmentation
+            prediction = model.predict(preprocessed_image)
+        
+            # Post-process the prediction (e.g., convert to class labels)
+            # ... (Post-processing steps)
+        
+            return prediction
+        
+        def main():
+            st.title("AI-Based GIS: GeoTIFF Segmentation")
+        
+            # File Uploader
+            uploaded_file = st.file_uploader("Upload a GeoTIFF file", type=["tif"])
+        
+            if uploaded_file is not None:
+                # Read the image
+                with rasterio.open(uploaded_file) as src:
+                    image = src.read()
+        
+                # Display the image
+                st.image(image, caption="Uploaded Image")
+        
+                # Segment the image
+                segmented_image = segment_image(image)
+        
+                # Display the segmented image
+                st.image(segmented_image, caption="Segmented Image")
+        
+        if __name__ == "__main__":
+            main()
+
     
-        if uploaded_file is not None:
-            with rasterio.open(uploaded_file) as src:
-                image = src.read([1, 2, 3])  # RGB channels
-                image = np.moveaxis(image, 0, -1)
-                st.image(image, caption="Uploaded Orthophoto", use_column_width=True)
-    
-                # Apply segmentation
-                st.write("Applying segmentation with DeepLabV3...")
-                segmenter = pipeline("image-segmentation", model="huggingface/deeplabv3")
-                segmented_image = segmenter(image)
-                st.image(segmented_image, caption="Segmented Output", use_column_width=True)
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
     elif selected == "AI + BIM - From BIM to 4D Schedule":
