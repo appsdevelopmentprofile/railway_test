@@ -81,9 +81,6 @@ elif authentication_status:
             icons=['file-earmark-text', 'graph-up', 'exclamation-circle', 'clipboard-check'],
             default_index=0
         )
-
-        # New menu for additional modules
-        selected = option_menu(
             'AI Modules',
             [
                 "AI-based GIS From Images to GeoTiff",
@@ -95,8 +92,6 @@ elif authentication_status:
             icons=['map', 'calendar', 'cube', 'airplane'],
             default_index=0
         )
-
-
     
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
