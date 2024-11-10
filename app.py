@@ -693,11 +693,11 @@ elif authentication_status:
         st.header("AI-based Surveying Tool for Digital Twins")
     
         # Sidebar for uploading point cloud data
-        st.sidebar.header("Upload Point Cloud Data")
-        uploaded_file = st.sidebar.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
+        st.subheader("Upload Point Cloud Data")
+        uploaded_file = st.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
         
         # Option for AI Model Selection
-        model_select = st.sidebar.selectbox(
+        model_select = st.selectbox(
             "Choose AI Model for Point Cloud Classification",
             ["PointCNN", "DGCNN", "SCAN"]
         )
