@@ -1,4 +1,4 @@
-tf-keras-vis
+tf-keras
 streamlit
 python-multipart
 streamlit-option-menu
@@ -27,3 +27,4 @@ torch
 keras
 tensorflow>=2.0.0
 tqdm
+tensorflow_hub
