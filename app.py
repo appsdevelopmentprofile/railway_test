@@ -508,12 +508,12 @@ elif authentication_status:
         
             st.success("Report generated successfully! You can download it using the button above.")
 
-
+    
     # Module 1: AI-based GIS - From Images to GeoTiff
-# Module 1: AI-based GIS - From Images to GeoTiff
     elif selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
-    # Function to load and process GeoTIFF file
+    
+        # Function to load and process GeoTIFF file
         def load_geotiff(uploaded_file):
             with rasterio.open(uploaded_file) as src:
                 image = src.read([1, 2, 3])  # Read RGB bands
@@ -525,43 +525,44 @@ elif authentication_status:
         def segment_image(image):
             # Load DeepLabV3 pre-trained model from TensorFlow Hub
             deeplab_model = hub.load("https://tfhub.dev/tensorflow/deeplabv3/1")
-            
+    
             # Preprocess image for DeepLabV3 input
             img = Image.fromarray(image)
             img = img.resize((256, 256))  # Resize to model input size
             img = img_to_array(img)  # Convert to array
             img = np.expand_dims(img, axis=0)  # Add batch dimension
             img = img / 255.0  # Normalize image
-            
+    
             # Perform segmentation
             pred = deeplab_model(img)  # Predict segmentation mask
             pred = np.argmax(pred, axis=-1)[0]  # Get the most probable class for each pixel
             return pred
-        
+    
         # Streamlit interface
         def app():
             st.title("AI-Based GIS - GeoTIFF Raster Segmentation")
-            
+    
             st.write("Upload a GeoTIFF orthophoto to visualize and apply AI-based segmentation.")
-        
+    
             # Upload file
             uploaded_file = st.file_uploader("Choose a GeoTIFF file", type=["tif", "tiff"])
-            
+    
             if uploaded_file is not None:
                 # Load and display GeoTIFF image
                 image = load_geotiff(uploaded_file)
                 st.image(image, caption="Uploaded GeoTIFF Image", use_column_width=True)
-                
+    
                 # Segmentation option
                 if st.button("Segment Image"):
                     # Apply AI-based segmentation using DeepLabV3 from TensorFlow Hub
                     segmented_image = segment_image(image)
-                    
+    
                     # Display segmented result
                     st.image(segmented_image, caption="Segmented Image", use_column_width=True, clamp=True)
-        
+    
         if __name__ == "__main__":
             app()
+
 
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
