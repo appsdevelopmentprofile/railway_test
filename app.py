@@ -81,17 +81,17 @@ elif authentication_status:
             icons=['file-earmark-text', 'graph-up', 'exclamation-circle', 'clipboard-check'],
             default_index=0
         )
-            'AI Modules',
-            [
-                "AI-based GIS From Images to GeoTiff",
-                "AI + BIM - from BIM to 4D schedule",
-                "3D pointclouds – AI for Digital Twins",
-                "AI-Enhanced Drone Mapping - Lidar"
-            ],
-            menu_icon='layers',
-            icons=['map', 'calendar', 'cube', 'airplane'],
-            default_index=0
-        )
+                'AI Modules',
+                [
+                    "AI-based GIS From Images to GeoTiff",
+                    "AI + BIM - from BIM to 4D schedule",
+                    "3D pointclouds – AI for Digital Twins",
+                    "AI-Enhanced Drone Mapping - Lidar"
+                ],
+                menu_icon='layers',
+                icons=['map', 'calendar', 'cube', 'airplane'],
+                default_index=0
+            )
     
     # Create temporary directory if it doesn't exist
     os.makedirs("temp", exist_ok=True)
