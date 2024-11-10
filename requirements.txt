@@ -25,5 +25,5 @@ laspy
 rasterio
 torch
 keras
-tensorflow
+tensorflow>=2.0.0
 tqdm
