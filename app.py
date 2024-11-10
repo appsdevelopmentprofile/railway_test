@@ -679,8 +679,16 @@ elif authentication_status:
     # Module 3: 3D Point Clouds - AI for Digital Twins
 # Title of the app
      elif selected == "3D Point Clouds – AI for Digital Twins":
+        import open3d as o3d
+        import pdal
+        import pyntcloud
+        import numpy as np
+        import pyvista as pv
+        from transformers import pipeline
+        import matplotlib.pyplot as plt
+        import laspy
         st.header("AI-based Surveying Tool for Digital Twins")
-        
+
         # Sidebar for uploading point cloud data
         st.sidebar.header("Upload Point Cloud Data")
         uploaded_file = st.sidebar.file_uploader("Upload a .las, .ply, or .pcd file", type=["las", "ply", "pcd"])
