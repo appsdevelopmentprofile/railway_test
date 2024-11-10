@@ -512,42 +512,42 @@ elif authentication_status:
         # Function to load and visualize the GeoTIFF image
         def segment_image(image):
     # Load the DeepLabV3 model
-        model = tf.keras.models.load_model('deeplabv3_model.h5')  # Replace with your model path
+            model = tf.keras.models.load_model('deeplabv3_model.h5')  # Replace with your model path
+            
+            # Preprocess the image for the model
+            preprocessed_image = tf.image.resize(image, (224, 224))  # Resize to model input size
+            preprocessed_image = preprocessed_image / 255.0  # Normalize pixel values to [0, 1]
+            preprocessed_image = tf.expand_dims(preprocessed_image, axis=0)  # Add batch dimension
+            
+            # Perform segmentation
+            prediction = model.predict(preprocessed_image)
+            
+            # Post-process the prediction (e.g., convert to class labels)
+            segmented_image = prediction[0]  # Assuming the model output is a single-channel mask
+            return segmented_image
+    
+        def main():
+            st.title("AI-Based GIS: GeoTIFF Segmentation")
         
-        # Preprocess the image for the model
-        preprocessed_image = tf.image.resize(image, (224, 224))  # Resize to model input size
-        preprocessed_image = preprocessed_image / 255.0  # Normalize pixel values to [0, 1]
-        preprocessed_image = tf.expand_dims(preprocessed_image, axis=0)  # Add batch dimension
+            # File Uploader
+            uploaded_file = st.file_uploader("Upload a GeoTIFF file", type=["tif"])
         
-        # Perform segmentation
-        prediction = model.predict(preprocessed_image)
+            if uploaded_file is not None:
+                # Read the image using rasterio
+                with rasterio.open(uploaded_file) as src:
+                    image = src.read(1)  # Read the first band (assuming single band image)
         
-        # Post-process the prediction (e.g., convert to class labels)
-        segmented_image = prediction[0]  # Assuming the model output is a single-channel mask
-        return segmented_image
-    
-    def main():
-        st.title("AI-Based GIS: GeoTIFF Segmentation")
-    
-        # File Uploader
-        uploaded_file = st.file_uploader("Upload a GeoTIFF file", type=["tif"])
-    
-        if uploaded_file is not None:
-            # Read the image using rasterio
-            with rasterio.open(uploaded_file) as src:
-                image = src.read(1)  # Read the first band (assuming single band image)
-    
-            # Display the image
-            st.image(image, caption="Uploaded Image", use_column_width=True)
-    
-            # Segment the image
-            segmented_image = segment_image(image)
-    
-            # Display the segmented image
-            st.image(segmented_image, caption="Segmented Image", use_column_width=True)
-    
-    if __name__ == "__main__":
-        main()
+                # Display the image
+                st.image(image, caption="Uploaded Image", use_column_width=True)
+        
+                # Segment the image
+                segmented_image = segment_image(image)
+        
+                # Display the segmented image
+                st.image(segmented_image, caption="Segmented Image", use_column_width=True)
+        
+        if __name__ == "__main__":
+            main()
     
     # Module 2: AI + BIM - From BIM to 4D Schedule
     elif selected == "AI + BIM - From BIM to 4D Schedule":
