@@ -28,3 +28,5 @@ keras
 tensorflow>=2.0.0
 tqdm
 tensorflow_hub
+open3d 
+pyntcloud
