@@ -506,7 +506,7 @@ elif authentication_status:
 
 
     # Module 1: AI-based GIS - From Images to GeoTiff
-    if selected == "AI-based GIS - From Images to GeoTiff":
+    elif selected == "AI-based GIS - From Images to GeoTiff":
         st.header("AI-based GIS - GeoTiff Segmentation")
         uploaded_file = st.file_uploader("Upload a .tfw GeoTiff", type="tfw")
     
