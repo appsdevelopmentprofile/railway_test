@@ -65,12 +65,15 @@ elif authentication_status == None:
     st.warning("Please enter your username and password")
 
 elif authentication_status:
-    # ---- SIDEBAR ----
+    # ---- LOGOUT AND GREETING ----
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
 
-    # Sidebar with a single menu
-    with st.sidebar:
+    # Split layout into two columns: left for menu, right for chatbot
+    col1, col2 = st.columns([2, 1])
+
+    with col1:
+        # Sidebar Menu
         selected = option_menu(
             'RFO Central Application & AI Modules',  # Combined title
             [
@@ -87,11 +90,47 @@ elif authentication_status:
             icons=['file-earmark-text', 'graph-up', 'exclamation-circle', 'clipboard-check', 'map', 'calendar', 'cube', 'airplane'],
             default_index=0
         )
-    
-    # Create temporary directory if it doesn't exist
-    os.makedirs("temp", exist_ok=True)
 
+        # Display content based on the selected module
+        st.header(selected)
+        st.write(f"This is the content for {selected} module.")  # Replace with actual content
 
+    with col2:
+        # --- CHATBOT IN RIGHT COLUMN ---
+        st.subheader("💬 Chatbot")
+        st.caption("🚀 A Streamlit chatbot powered by OpenAI")
+
+        openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+        st.write("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
+        st.write("[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)")
+        st.write("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)")
+
+        if "messages" not in st.session_state:
+            st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
+
+        # Display chat history
+        for msg in st.session_state.messages:
+            st.chat_message(msg["role"]).write(msg["content"])
+
+        # User input
+        if prompt := st.chat_input():
+            if not openai_api_key:
+                st.info("Please add your OpenAI API key to continue.")
+                st.stop()
+
+            # Send user message
+            client = OpenAI(api_key=openai_api_key)
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.chat_message("user").write(prompt)
+
+            # Get response from OpenAI
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=st.session_state.messages
+            )
+            msg = response.choices[0].message.content
+            st.session_state.messages.append({"role": "assistant", "content": msg})
+            st.chat_message("assistant").write(msg)
 
     # Doc Intelligence Section
     if selected == 'Doc Intelligence':
