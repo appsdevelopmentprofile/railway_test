@@ -73,7 +73,7 @@ elif authentication_status:
         )
 
 
-            st.divider()  # Optional: Divider for visual separation
+        st.divider()  # Optional: Divider for visual separation
     
         # New menu for additional modules
         st.header("AI Modules")
