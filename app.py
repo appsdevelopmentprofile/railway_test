@@ -78,9 +78,6 @@ elif authentication_status:
             default_index=0
         )
 
-        # Optional: Divider for visual separation
-    st.divider()
-
         # New menu for additional modules
         st.header("AI Modules")
         selected_module = option_menu(
