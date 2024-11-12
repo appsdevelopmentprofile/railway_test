@@ -26,6 +26,7 @@ from rasterio.plot import show
 import tensorflow_hub as hub
 from tensorflow.keras.preprocessing.image import img_to_array
 import io
+from openai import OpenAI
 
 # --- Set page configuration ---
 st.set_page_config(
@@ -68,7 +69,10 @@ elif authentication_status:
     # ---- LOGOUT AND GREETING ----
     authenticator.logout("Logout", "sidebar")
     st.sidebar.title(f"Welcome {name}")
-    selected = option_menu(
+
+    # Sidebar Menu
+    with st.sidebar:
+        selected = option_menu(
             'RFO Central Application & AI Modules',  # Combined title
             [
                 "Doc Intelligence",
@@ -85,30 +89,24 @@ elif authentication_status:
             default_index=0
         )
 
-        # Display content based on the selected module
-    st.header(selected)
-    st.write(f"This is the content for {selected} module.")  # Replace with actual content
-    # Split layout into two columns: left for menu, right for chatbot
+    # Split layout into two columns: left for selected content, right for chatbot
     col1, col2 = st.columns([2, 1])
 
     with col1:
-        # Sidebar Menu
 
         # Doc Intelligence Section
         if selected == 'Doc Intelligence':
-            # Load the model and tokenizer using TensorFlow
+            # Initialize model and tokenizer once
             model = TFBertForSequenceClassification.from_pretrained("bert-base-uncased")
             tokenizer = BertTokenizerFast.from_pretrained("bert-base-uncased")
-            
-            # Initialize a pipeline for prediction
             nlp_pipeline = pipeline("text-classification", model=model, tokenizer=tokenizer, framework="tf")
-    
-            # Function to process the uploaded files
-            def doc_intelligence():
-                # Set up the page for document intelligence
+            
+            def document_intelligence_module():
+                """Main function for Document Intelligence with OCR, file processing, and OneDrive upload."""
+                
                 st.title("Document Intelligence with OCR")
             
-                # File uploader for multiple files (images, PDFs)
+                # File uploader for multiple documents (images, PDFs)
                 uploaded_files = st.file_uploader("Upload your documents (images, PDFs)", type=['png', 'jpg', 'jpeg', 'pdf'], accept_multiple_files=True)
             
                 # OneDrive Document Upload Section
@@ -118,68 +116,90 @@ elif authentication_status:
             
                 # OneDrive upload action
                 if upload_file and one_drive_upload_url and st.button("Upload to OneDrive"):
-                    temp_file_path = os.path.join("temp", upload_file.name)
-                    with open(temp_file_path, "wb") as f:
-                        f.write(upload_file.getbuffer())
+                    temp_file_path = save_temp_file(upload_file)
+                    
                     with open(temp_file_path, "rb") as f:
                         files = {'file': f}
                         response = requests.post(one_drive_upload_url, files=files)
+                    
                     if response.status_code == 200:
                         st.success("Upload successful!")
                     else:
                         st.error("Upload failed. Please check the OneDrive link and try again.")
+                    
                     os.remove(temp_file_path)
             
-                # Document Processing
+                # Process uploaded documents
                 if uploaded_files:
                     for uploaded_file in uploaded_files:
                         st.write(f"Processing: {uploaded_file.name}")
-            
-                        # Save temporary file
+                        
+                        # Save the uploaded file temporarily
                         with tempfile.NamedTemporaryFile(delete=False) as temp_file:
                             temp_file.write(uploaded_file.read())
                             temp_file_path = temp_file.name
             
-                        # Handle image files
+                        # Process image files
                         if uploaded_file.type.startswith("image/"):
-                            image = Image.open(temp_file_path)
-                            st.image(image, caption="Uploaded Image", use_column_width=True)
-                            if st.button(f"Extract Text from {uploaded_file.name}", key=f"extract_{uploaded_file.name}"):
-                                extracted_text = pytesseract.image_to_string(image)
-                                st.subheader("Extracted Text:")
-                                st.write(extracted_text if extracted_text else "No text found.")
-                                
-                                # Make prediction using the Hugging Face model
-                                if extracted_text:
-                                    prediction = nlp_pipeline(extracted_text)
-                                    st.subheader("Prediction Result:")
-                                    st.write(prediction)
+                            process_image_file(temp_file_path, uploaded_file)
             
-                        # Handle PDF files
+                        # Process PDF files
                         elif uploaded_file.type == "application/pdf":
-                            doc_text = ""
-                            pdf = fitz.open(temp_file_path)
-                            for page_num in range(pdf.page_count):
-                                page = pdf[page_num]
-                                doc_text += page.get_text("text")
-                            st.subheader("Extracted Text from PDF:")
-                            st.write(doc_text if doc_text else "No text found in PDF.")
-                            
-                            # Make prediction using the Hugging Face model
-                            if doc_text:
-                                prediction = nlp_pipeline(doc_text)
-                                st.subheader("Prediction Result:")
-                                st.write(prediction)
-                            pdf.close()
+                            process_pdf_file(temp_file_path)
             
-                        # Remove temporary file
+                        # Clean up temporary file
                         os.remove(temp_file_path)
             
                 # Document Analysis Button
                 if st.button('Analyze Document Content'):
                     st.success("Feature extraction and analysis results will be displayed here.")
-    
-    
+            
+            def save_temp_file(upload_file):
+                """Saves the uploaded file temporarily and returns the file path."""
+                temp_file_path = os.path.join("temp", upload_file.name)
+                with open(temp_file_path, "wb") as f:
+                    f.write(upload_file.getbuffer())
+                return temp_file_path
+            
+            def process_image_file(temp_file_path, uploaded_file):
+                """Processes an uploaded image file, extracts text, and predicts content."""
+                image = Image.open(temp_file_path)
+                st.image(image, caption="Uploaded Image", use_column_width=True)
+                
+                if st.button(f"Extract Text from {uploaded_file.name}", key=f"extract_{uploaded_file.name}"):
+                    extracted_text = pytesseract.image_to_string(image)
+                    st.subheader("Extracted Text:")
+                    st.write(extracted_text if extracted_text else "No text found.")
+                    
+                    # Prediction using the Hugging Face model
+                    if extracted_text:
+                        prediction = nlp_pipeline(extracted_text)
+                        st.subheader("Prediction Result:")
+                        st.write(prediction)
+            
+            def process_pdf_file(temp_file_path):
+                """Processes an uploaded PDF file, extracts text, and predicts content."""
+                doc_text = ""
+                pdf = fitz.open(temp_file_path)
+                
+                for page_num in range(pdf.page_count):
+                    page = pdf[page_num]
+                    doc_text += page.get_text("text")
+                
+                pdf.close()
+                
+                st.subheader("Extracted Text from PDF:")
+                st.write(doc_text if doc_text else "No text found in PDF.")
+                
+                # Prediction using the Hugging Face model
+                if doc_text:
+                    prediction = nlp_pipeline(doc_text)
+                    st.subheader("Prediction Result:")
+                    st.write(prediction)
+            
+            # Run the Document Intelligence module
+            document_intelligence_module()
+            
      ## Module 2 - Predictive Analytics for Operational Planning
         
         
@@ -215,13 +235,13 @@ elif authentication_status:
         
             # Input section for Work Descriptions and Incident Reports
             st.subheader("Input Work Descriptions and Incident Reports")
-            col1, col2 = st.columns(2)
+            col3, col4 = st.columns(2)
         
-            with col1:
+            with col3:
                 work_descriptions = st.text_area("Enter Work Descriptions (comma-separated):",
                                                   "Replace pressure-safety-valve on wellhead, Inspect hydraulics for leaks, Routine maintenance on compressor, Test gas leak detection system, Install new fire safety cabinet")
         
-            with col2:
+            with col4:
                 incident_reports = st.text_area("Enter Incident Reports (comma-separated):",
                                                  "Trapped finger while replacing valve, Hydraulic fluid leakage caused fire, Compressor malfunctioned during routine maintenance, Gas detector failed to trigger during test, Fire safety cabinet installation delayed due to missing parts")
         
@@ -300,10 +320,10 @@ elif authentication_status:
         
             # Input data submission with the 10 variables
             st.subheader("Submit Your Data")
-            col1, col2 = st.columns(2)
+            col5, col6 = st.columns(2)
         
             # Step 1: Data Submission
-            with col1:
+            with col5:
                 uploaded_file = st.file_uploader("Upload a CSV file with your data (10 variables, rows of samples)", type=["csv"])
         
                 if uploaded_file is not None:
@@ -311,7 +331,7 @@ elif authentication_status:
                     st.write("Data Preview:")
                     st.dataframe(data.head())
         
-            with col2:
+            with col6:
                 # Step 2: Normalize the data
                 if uploaded_file is not None:
                     scaler = StandardScaler()
@@ -706,52 +726,140 @@ elif authentication_status:
             
         # Module 4: AI-Enhanced Drone Mapping - LiDAR
         elif selected == "AI-Enhanced Drone Mapping - LiDAR":
+            # Function to fetch .las file from OneDrive
+            def download_onedrive_file(onedrive_url):
+                # Assuming the provided link is a direct download link
+                # If not, you'll need to adapt this according to the OneDrive API
+                response = requests.get(onedrive_url)
+                
+                if response.status_code == 200:
+                    # Save the content to a temporary file or process directly
+                    with open("temp.las", "wb") as f:
+                        f.write(response.content)
+                    return "temp.las"
+                else:
+                    st.error("Failed to download the file from OneDrive. Please check the link.")
+                    return None
+            
+            # Function to visualize the point cloud
+            def visualize_point_cloud(coords):
+                # Visualize the LiDAR point cloud with PyVista
+                point_cloud = pv.PolyData(coords)
+                plotter = pv.Plotter()
+                plotter.add_points(point_cloud)
+                plotter.show()
+            
             st.header("AI for LiDAR-based Drone Mapping")
         
             st.write("""
                 Upload a LiDAR point cloud file to classify and process drone mapping data. 
                 This tool leverages AI-based models to classify ground and non-ground points.
             """)
-            uploaded_file = st.file_uploader("Upload LiDAR Point Cloud", type=["las", "laz", "ply"])
         
+            # Option 1: File uploader for local uploads
+            uploaded_file = st.file_uploader("Upload LiDAR Point Cloud", type=["las", "laz", "ply"])
+            
             if uploaded_file is not None:
                 coords = np.loadtxt(uploaded_file)  # Load the point cloud data
                 visualize_point_cloud(coords)  # Visualize point cloud with PyVista
+            
+            # Option 2: Chatbot input for OneDrive link submission
+            if "messages" not in st.session_state:
+                st.session_state.messages = []
+            
+            user_message = st.text_input("Enter OneDrive link to your .las file:")
+        
+            if user_message:
+                # Send user message to chatbot and process
+                st.session_state.messages.append({"role": "user", "content": user_message})
+                
+                # Display chat message (this can be styled to look like a chatbot interaction)
+                st.chat_message("user").write(user_message)
+                
+                # Process OneDrive link
+                st.write(f"Processing LiDAR file from OneDrive link: {user_message}")
+                
+                # Download the .las file from OneDrive
+                file_path = download_onedrive_file(user_message)
+                
+                if file_path:
+                    # Load and process the LiDAR point cloud
+                    coords = np.loadtxt(file_path)  # Load the point cloud data
+                    visualize_point_cloud(coords)  # Visualize point cloud with PyVista
         
             st.write("Further process LiDAR data for classification or other tasks.")
-    
-    
-            
-    
-        with col2:
-            # --- CHATBOT IN RIGHT COLUMN ---
-            st.subheader("💬 Chatbot")
-            st.caption("🚀 A Streamlit chatbot powered by OpenAI")
-    
-            openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
-            st.write("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
-            st.write("[View the source code](https://github.com/streamlit/llm-examples/blob/main/Chatbot.py)")
-            st.write("[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/streamlit/llm-examples?quickstart=1)")
-    
-            if "messages" not in st.session_state:
-                st.session_state["messages"] = [{"role": "assistant", "content": "How can I help you?"}]
-    
-            # Display chat history
-            for msg in st.session_state.messages:
-                st.chat_message(msg["role"]).write(msg["content"])
-    
-            # User input
-            if prompt := st.chat_input():
-                if not openai_api_key:
-                    st.info("Please add your OpenAI API key to continue.")
-                    st.stop()
-    
-                # Send user message
-                client = OpenAI(api_key=openai_api_key)
-                st.session_state.messages.append({"role": "user", "content": prompt})
-                st.chat_message("user").write(prompt)
-    
-                # Get response from OpenAI
+
+    with col2:
+        # --- CHATBOT IN RIGHT COLUMN ---
+        st.subheader(f"Hello {name}, I am your upskiller!")
+        
+        # OpenAI API Key input
+        openai_api_key = st.text_input("OpenAI API Key", key="chatbot_api_key", type="password")
+        st.write("[Get an OpenAI API key](https://platform.openai.com/account/api-keys)")
+        
+        # Initialize chat history in session state
+        if "messages" not in st.session_state:
+            st.session_state["messages"] = [
+                {"role": "assistant", "content": "Let's start with the demo. Write 'start' and click enter."}
+            ]
+        
+        # Restart Chat button
+        if st.button("Restart Chat"):
+            # Clear chat messages to restart the conversation
+            st.session_state["messages"] = [
+                {"role": "assistant", "content": "Let's start with the demo. Write 'start' and click enter."}
+            ]
+        
+        # Display chat history
+        for msg in st.session_state.messages:
+            st.chat_message(msg["role"]).write(msg["content"])
+        
+        # Accept user input
+        if prompt := st.chat_input():
+            if not openai_api_key:
+                st.info("Please add your OpenAI API key to continue.")
+                st.stop()
+        
+            # Send user message
+            client = OpenAI(api_key=openai_api_key)
+            st.session_state.messages.append({"role": "user", "content": prompt})
+            st.chat_message("user").write(prompt)
+        
+            # Define bot response logic
+            if prompt.strip().lower() == "start":
+                # Start demo process
+                msg = "Thank you! Let's add some sample files for demoing purposes. Do you have Orthos or Lidar files?"
+                st.session_state.messages.append({"role": "assistant", "content": msg})
+                
+                # Display "Yes" and "No" buttons
+                has_files = st.radio("Do you have Orthos or Lidar files?", ["Yes", "No"])
+                
+                if has_files == "No":
+                    # If customer doesn't have files, display links
+                    no_files_response = (
+                        "No problem! You can use these sample datasets:\n\n"
+                        f"**TIFF**: [SAIT Orthos TIFF file](https://mysait-my.sharepoint.com/:i:/r/personal/rick_duchscher_sait_ca/Documents/UAV%20Projects/SAIT%20OGL%202018/SAIT_OGL_Orthos_2018/R004_C001.tif?csf=1&web=1&e=Q0f8v7)\n"
+                        f"**LAS**: [SAIT Lidar LAS file](https://mysait-my.sharepoint.com/:u:/r/personal/rick_duchscher_sait_ca/Documents/UAV%20Projects/SAIT%20OGL%202018/SAIT_OGL_Lidar_2018/Colorized/Sait_CIR_NonGround.las?csf=1&web=1&e=Ky9ftA)"
+                    )
+                    st.session_state.messages.append({"role": "assistant", "content": no_files_response})
+                    st.chat_message("assistant").write(no_files_response)
+        
+                elif has_files == "Yes":
+                    # If customer has files, prompt for the file location link
+                    file_location_response = "Great! Please enter the link to where your files are located."
+                    st.session_state.messages.append({"role": "assistant", "content": file_location_response})
+                    st.chat_message("assistant").write(file_location_response)
+        
+                    # Display text box for customer to input file location link
+                    user_file_link = st.text_input("Enter your file location link here:")
+                    if user_file_link:
+                        st.session_state.messages.append({"role": "user", "content": f"Customer provided file link: {user_file_link}"})
+                        st.chat_message("user").write(f"Customer provided file link: {user_file_link}")
+                        
+                        # Proceed with using `user_file_link` in your main app functionality as needed
+        
+            else:
+                # Other non-start responses - get response from OpenAI
                 response = client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=st.session_state.messages
@@ -759,5 +867,3 @@ elif authentication_status:
                 msg = response.choices[0].message.content
                 st.session_state.messages.append({"role": "assistant", "content": msg})
                 st.chat_message("assistant").write(msg)
-    
-
