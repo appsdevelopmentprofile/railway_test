@@ -255,7 +255,7 @@ elif selected == "Field AI Assistant":
             else:
                 st.warning(f"Missing: {item}")
 
-"""
 elif selected == "AI Testing":
     st.title("Automated AI Testing")
     # [Selenium or Test Automation Code Here]
+"""
