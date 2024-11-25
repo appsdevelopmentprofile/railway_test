@@ -1,11 +1,11 @@
 import streamlit as st
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 from PIL import Image
+import pytesseract
 
 # Streamlit frontend
-st.title("Instrumentation Plan Processing")
+st.title("Instrumentation Plan Processing with Text Extraction")
 
 # File uploader for image input
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
@@ -36,10 +36,6 @@ if uploaded_file is not None:
             instrument_shapes.append((x, y, w, h))
             cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-    # Display the processed image
-    st.subheader("Processed Image with Detected Shapes:")
-    st.image(img, channels="BGR")
-
     # Detect circular symbols using Hough Circle Transform
     gray_blur = cv2.GaussianBlur(gray, (9, 9), 2)
     circles = cv2.HoughCircles(
@@ -61,27 +57,39 @@ if uploaded_file is not None:
             radius = circle[2]  # radius
             cv2.circle(original_img, center, radius, (0, 255, 0), 2)
 
-    # Display the detected circles
+    # Display processed images
+    st.subheader("Processed Image with Detected Shapes:")
+    st.image(img, channels="BGR")
+
     st.subheader("Processed Image with Detected Circles:")
     st.image(original_img, channels="BGR")
 
-    # Display detected shapes in a table
-    st.subheader("Extracted Instrument Shapes:")
+    # Display detected shapes and extract text
+    st.subheader("Extracted Instrument Shapes and Circles:")
     if instrument_shapes or circles is not None:
         cols = st.columns(3)
-        # Display instrument shapes (rectangular bounding boxes)
+
+        # Process rectangular shapes
         for i, (x, y, w, h) in enumerate(instrument_shapes):
             cropped_shape = img[y:y + h, x:x + w]
+            pil_image = Image.fromarray(cv2.cvtColor(cropped_shape, cv2.COLOR_BGR2RGB))
+            text = pytesseract.image_to_string(pil_image).strip()
+
             with cols[i % 3]:
                 st.image(cropped_shape, caption=f"Shape {i + 1}")
+                st.text(f"Extracted Text: {text}")
 
-        # Display detected circular symbols
+        # Process detected circles
         if circles is not None:
             for i, circle in enumerate(circles[0, :]):
                 x, y, r = circle
                 cropped_circle = original_img[y-r:y+r, x-r:x+r]
                 if cropped_circle.size > 0:
+                    pil_image = Image.fromarray(cv2.cvtColor(cropped_circle, cv2.COLOR_BGR2RGB))
+                    text = pytesseract.image_to_string(pil_image).strip()
+
                     with cols[(i + len(instrument_shapes)) % 3]:
                         st.image(cropped_circle, caption=f"Circle {i + 1}")
+                        st.text(f"Extracted Text: {text}")
     else:
         st.write("No shapes or circles detected.")
