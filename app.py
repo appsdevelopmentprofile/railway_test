@@ -73,7 +73,7 @@ if selected == "Doc Intelligence":
             st.write("No shapes detected.")
 
 
-
+"""
 elif selected == "Field AI Assistant":
     st.title("AI Field Assistant")
     # [Speech-to-Text and Audio Processing Code Here]
@@ -245,7 +245,7 @@ elif selected == "Field AI Assistant":
             else:
                 st.warning(f"Missing: {item}")
 
-
+"""
 elif selected == "AI Testing":
     st.title("Automated AI Testing")
     # [Selenium or Test Automation Code Here]
