@@ -12,7 +12,7 @@ st.set_page_config(page_title="applus", layout="wide", page_icon="🧑‍⚕️"
 # [Implement fixed authentication mechanism]
 
 # Sidebar
-selected = st.sidebar.selectbox("Select Module", ["Doc Intelligence", "Field AI Assistant", "AI Testing")
+selected = st.sidebar.selectbox("Select Module", ["Doc Intelligence", "Field AI Assistant", "AI Testing"])
 
 # Main Modules
 if selected == "Doc Intelligence":
