@@ -37,8 +37,4 @@ gtts
 pydub
 PyPDF2
 pdfplumber
-streamlit_audio_recorder
-streamlit
-SpeechRecognition
-pydub
-git+https://github.com/stefanrmmr/streamlit_audio-recorder.git
+
