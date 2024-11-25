@@ -37,3 +37,4 @@ gtts
 pydub
 PyPDF2
 pdfplumber
+streamlit_audio_recorder
