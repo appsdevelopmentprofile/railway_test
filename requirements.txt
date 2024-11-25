@@ -30,4 +30,4 @@ tqdm
 tensorflow_hub
 pyntcloud
 openai
-opencv-python
+opencv-python-headless
