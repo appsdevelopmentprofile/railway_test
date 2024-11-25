@@ -3,8 +3,7 @@ import tensorflow as tf
 import streamlit as st
 from PIL import Image
 import pytesseract
-import tempfile
-from transformers import BertTokenizerFast, TFBertForSequenceClassification, pipeline
+
 
 st.set_page_config(page_title="applus", layout="wide", page_icon="🧑‍⚕️")
 
