@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from PIL import Image
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract''
+pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
 
 # Streamlit frontend
 st.title("Instrumentation Plan Processing with Text Extraction")
