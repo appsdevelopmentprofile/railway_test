@@ -41,4 +41,4 @@ streamlit_audio_recorder
 streamlit
 SpeechRecognition
 pydub
-streamlit_audio-recorder
+git+https://github.com/stefanrmmr/streamlit_audio-recorder.git
