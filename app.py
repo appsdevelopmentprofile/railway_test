@@ -5,8 +5,30 @@ from PIL import Image
 import pytesseract
 
 
-!python sudo apt install tesseract-ocr
-!python sudo apt install libtesseract-dev
+import subprocess
+import sys
+
+def install_tesseract():
+    try:
+        # Update package lists
+        subprocess.run(["sudo", "apt", "update"], check=True)
+
+        # Install Tesseract OCR
+        subprocess.run(["sudo", "apt", "install", "-y", "tesseract-ocr"], check=True)
+
+        # Install Tesseract development library
+        subprocess.run(["sudo", "apt", "install", "-y", "libtesseract-dev"], check=True)
+
+        print("Tesseract OCR and its development library installed successfully.")
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error occurred: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    install_tesseract()
+
+
 
 import pytesseract
 from PIL import Image
