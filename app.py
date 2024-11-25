@@ -5,7 +5,7 @@ from PIL import Image
 import easyocr
 
 # Initialize EasyOCR reader
-reader = easyocr.Reader(['en'])  # Specify language(s)
+reader = easyocr.Reader(['en'], verbose=True)
 
 # Streamlit frontend
 st.title("Instrumentation Plan Processing with Text Extraction")
