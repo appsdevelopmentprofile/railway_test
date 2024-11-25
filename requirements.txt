@@ -31,3 +31,9 @@ tensorflow_hub
 pyntcloud
 openai
 opencv-python-headless
+streamlit
+SpeechRecognition
+gtts
+pydub
+PyPDF2
+pdfplumber
