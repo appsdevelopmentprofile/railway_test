@@ -22,7 +22,7 @@ if selected == "Doc Intelligence":
     from PIL import Image
     
     # Streamlit frontend
-    st.title("Image Processing: Detect Shapes")
+    st.title("Instrumentation Plan Processing")
     
     # File uploader for image input
     uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
@@ -30,47 +30,57 @@ if selected == "Doc Intelligence":
     if uploaded_file is not None:
         # Read the uploaded image
         file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-        img = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
+        img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     
         # Display the uploaded image
         st.subheader("Uploaded Image:")
         st.image(img, channels="BGR")
-        
-        # Apply thresholding
-        result, thresh = cv2.threshold(img, 150, 255, cv2.THRESH_BINARY_INV)
-        
-        # Convert to grayscale
-        if len(thresh.shape) == 3:  # If the image is not grayscale
-            thresh_gray = cv2.cvtColor(thresh, cv2.COLOR_BGR2GRAY)
-        else:
-            thresh_gray = thresh
-        
-        # Detect contours
-        contours = cv2.findContours(thresh_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[0]
-        
-        # Draw bounding boxes and extract shapes
-        detected_shapes = []
-        for i, contour in enumerate(contours):
+    
+        # Step 1: Convert to grayscale
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    
+        # Step 2: Apply Gaussian blur to reduce noise
+        blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    
+        # Step 3: Use edge detection (Canny)
+        edges = cv2.Canny(blurred, 50, 150)
+    
+        # Step 4: Dilate edges to close gaps
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+        dilated = cv2.dilate(edges, kernel, iterations=2)
+    
+        # Step 5: Detect contours
+        contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+        # Create a mask to remove the frame and unwanted lines
+        mask = np.zeros_like(gray)
+        cv2.drawContours(mask, contours, -1, (255), thickness=cv2.FILLED)
+    
+        # Step 6: Remove text and continuous lines by filtering contour size
+        instrument_shapes = []
+        for contour in contours:
             x, y, w, h = cv2.boundingRect(contour)
-            cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
-            
-            # Crop detected shape
-            shape_crop = img[y:y+h, x:x+w]
-            detected_shapes.append(shape_crop)
-        
+    
+            # Filter based on size (ignore very large/small contours)
+            if 50 < w < 500 and 50 < h < 500:  # Adjust these thresholds as needed
+                instrument_shapes.append((x, y, w, h))
+                cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+    
         # Display the processed image
-        st.subheader("Processed Image with Bounding Boxes:")
+        st.subheader("Processed Image with Detected Shapes:")
         st.image(img, channels="BGR")
-        
-        # Create a table of detected shapes
-        if detected_shapes:
-            st.subheader("Detected Shapes:")
-            cols = st.columns(3)  # Adjust the number of columns based on preference
-            for i, shape in enumerate(detected_shapes):
-                with cols[i % 3]:  # Cycle through columns
-                    st.image(shape, caption=f"Shape {i+1}")
+    
+        # Display individual detected shapes
+        st.subheader("Extracted Instrument Shapes:")
+        if instrument_shapes:
+            cols = st.columns(3)  # Adjust number of columns for layout
+            for i, (x, y, w, h) in enumerate(instrument_shapes):
+                cropped_shape = img[y:y + h, x:x + w]
+                with cols[i % 3]:
+                    st.image(cropped_shape, caption=f"Shape {i + 1}")
         else:
-            st.write("No shapes detected.")
+            st.write("No instrument shapes detected.")
+
 
 
 """
