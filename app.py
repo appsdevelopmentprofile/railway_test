@@ -3,7 +3,7 @@ import numpy as np
 import streamlit as st
 
 # Streamlit UI for uploading image
-st.title("Image Analysis with Frame Cleanup")
+st.title("Image Analysis: Frame Removal and Shape Detection")
 uploaded_file = st.file_uploader("Upload an Image", type=["png", "jpg", "jpeg"])
 
 if uploaded_file:
@@ -18,55 +18,58 @@ if uploaded_file:
     # Step 1: Convert the image to grayscale
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Step 2: Threshold the image to make it binary (helps for contour detection)
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
+    # Step 2: Apply adaptive thresholding for better contrast on variable lighting conditions
+    thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, 
+                                  cv2.THRESH_BINARY_INV, 11, 2)
 
     # Step 3: Find contours in the thresholded image
     contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Step 4: Get the largest contour (which should be the main content area)
-    largest_contour = max(contours, key=cv2.contourArea)
+    # Step 4: Filter contours to remove small noise, keep only large enough contours
+    min_contour_area = 1000  # Minimum contour area to consider
+    contours = [cnt for cnt in contours if cv2.contourArea(cnt) > min_contour_area]
 
-    # Step 5: Create an empty mask (black image)
-    mask = np.zeros_like(gray)
+    # Step 5: Get the bounding box of the largest contour (this should cover the main content area)
+    if contours:
+        largest_contour = max(contours, key=cv2.contourArea)
+        x, y, w, h = cv2.boundingRect(largest_contour)
 
-    # Step 6: Draw the largest contour on the mask (white)
-    cv2.drawContours(mask, [largest_contour], -1, 255, thickness=cv2.FILLED)
+        # Step 6: Crop the image to this bounding box to remove unwanted frame areas
+        cropped_img = img[y:y+h, x:x+w]
 
-    # Step 7: Apply the mask to the original image
-    cleaned_img = cv2.bitwise_and(img, img, mask=mask)
+        # Display the cropped image (without the frame)
+        st.subheader("Cropped Image (Frame Removed)")
+        st.image(cropped_img, channels="BGR")
 
-    # Display the cleaned image (frame removed)
-    st.subheader("Cleaned Image (Without External Text/Noise)")
-    st.image(cleaned_img, channels="BGR")
+        # Step 7: Further image processing (detecting shapes) without the frame
+        gray_cropped = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2GRAY)
+        _, thresh_cropped = cv2.threshold(gray_cropped, 150, 255, cv2.THRESH_BINARY_INV)
 
-    # Step 8: Apply further processing to the cleaned image
-    # Thresholding to detect contours of the shapes inside the frame
-    _, thresh_cleaned = cv2.threshold(cv2.cvtColor(cleaned_img, cv2.COLOR_BGR2GRAY), 150, 255, cv2.THRESH_BINARY_INV)
+        # Detect contours in the cropped image (without the previous bounding boxes)
+        contours_cropped, _ = cv2.findContours(thresh_cropped, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Detect contours in the cleaned image
-    contours_cleaned, _ = cv2.findContours(thresh_cleaned, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # Step 8: Draw bounding boxes around detected shapes
+        detected_shapes = []
+        for i, contour in enumerate(contours_cropped):
+            x, y, w, h = cv2.boundingRect(contour)
+            cv2.rectangle(cropped_img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-    # Step 9: Draw bounding boxes around detected shapes
-    detected_shapes = []
-    for i, contour in enumerate(contours_cleaned):
-        x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(cleaned_img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            # Crop detected shape
+            shape_crop = cropped_img[y:y + h, x:x + w]
+            detected_shapes.append(shape_crop)
 
-        # Crop detected shape
-        shape_crop = cleaned_img[y:y + h, x:x + w]
-        detected_shapes.append(shape_crop)
+        # Display the processed image (with new bounding boxes)
+        st.subheader("Processed Image with New Bounding Boxes:")
+        st.image(cropped_img, channels="BGR")
 
-    # Display the processed image with bounding boxes
-    st.subheader("Processed Image with Bounding Boxes:")
-    st.image(cleaned_img, channels="BGR")
-
-    # Display the detected shapes in a table format
-    if detected_shapes:
-        st.subheader("Detected Shapes:")
-        cols = st.columns(3)  # Adjust the number of columns based on preference
-        for i, shape in enumerate(detected_shapes):
-            with cols[i % 3]:  # Cycle through columns
-                st.image(shape, caption=f"Shape {i + 1}")
+        # Display the detected shapes in a table format
+        if detected_shapes:
+            st.subheader("Detected Shapes:")
+            cols = st.columns(3)  # Adjust the number of columns based on preference
+            for i, shape in enumerate(detected_shapes):
+                with cols[i % 3]:  # Cycle through columns
+                    st.image(shape, caption=f"Shape {i + 1}")
+        else:
+            st.write("No shapes detected.")
     else:
-        st.write("No shapes detected.")
+        st.write("No contours found for the frame cleanup.")
