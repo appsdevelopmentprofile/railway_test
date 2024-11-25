@@ -3,7 +3,17 @@ import cv2
 import numpy as np
 from PIL import Image
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'/opt/homebrew/bin/tesseract'
+
+
+!python sudo apt install tesseract-ocr
+!python sudo apt install libtesseract-dev
+
+import pytesseract
+from PIL import Image
+
+# Set the path to the Tesseract executable
+pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
+
 
 # Streamlit frontend
 st.title("Instrumentation Plan Processing with Text Extraction")
