@@ -37,4 +37,3 @@ gtts
 pydub
 PyPDF2
 pdfplumber
-pytesseract.pytesseract.tesseract_cmd = r'/usr/bin/tesseract'
