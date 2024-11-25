@@ -85,6 +85,51 @@ elif selected == "Field AI Assistant":
     import os
     from pydub import AudioSegment
     import tempfile
+
+    import streamlit as st
+    from st_custom_components import st_audio_recorder
+    import speech_recognition as sr
+    from pydub import AudioSegment
+    import os
+    
+    # Title
+    st.title("Engineer Voice Input Recorder")
+    
+    # Display instruction
+    st.write("Click the button below to start recording your answer.")
+    
+    # Record audio
+    audio_data = st_audio_recorder(key="audio_recorder")
+    
+    if audio_data:
+        st.success("Recording captured successfully!")
+        
+        # Save the audio file locally as a WAV (you can customize format)
+        with open("recorded_audio.wav", "wb") as f:
+            f.write(audio_data)
+    
+        # Initialize speech recognition
+        recognizer = sr.Recognizer()
+        
+        # Load the WAV file
+        with sr.AudioFile("recorded_audio.wav") as source:
+            st.write("Processing the audio...")
+            audio = recognizer.record(source)
+        
+        # Perform speech-to-text
+        try:
+            transcription = recognizer.recognize_google(audio)
+            st.write("Transcription of your answer:")
+            st.text_area("Engineer Response", value=transcription, height=200)
+        except sr.UnknownValueError:
+            st.error("Could not understand the audio. Please ensure the recording is clear.")
+        except sr.RequestError as e:
+            st.error(f"Speech Recognition service error: {e}")
+        
+        # Cleanup temporary file
+        os.remove("recorded_audio.wav")
+
+
     
     # Define function to recognize speech from audio file
     def recognize_speech_from_file(audio_path):
