@@ -5,10 +5,10 @@ from PIL import Image
 import easyocr
 
 # Initialize EasyOCR reader
-reader = easyocr.Reader(['en'])  # Specify language(s) to recognize
+reader = easyocr.Reader(['en'])  # Specify language(s)
 
 # Streamlit frontend
-st.title("Instrumentation Plan Processor")
+st.title("Instrumentation Plan Processing with Text Extraction")
 
 # File uploader for image input
 uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
@@ -17,64 +17,78 @@ if uploaded_file is not None:
     # Read the uploaded image
     file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
     img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+    original_img = img.copy()
 
     # Display the uploaded image
     st.subheader("Uploaded Image:")
     st.image(img, channels="BGR")
 
-    # Convert to grayscale for processing
+    # Preprocessing: Remove external frame, text, and continuous lines
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+    edges = cv2.Canny(blurred, 50, 150)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
+    dilated = cv2.dilate(edges, kernel, iterations=2)
+    contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Detect contours to find shapes
-    _, thresh = cv2.threshold(gray, 150, 255, cv2.THRESH_BINARY_INV)
-    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-
-    # Detect circles using Hough Circle Transform
-    blurred_gray = cv2.GaussianBlur(gray, (9, 9), 2)
-    circles = cv2.HoughCircles(blurred_gray, cv2.HOUGH_GRADIENT, dp=1, minDist=50,
-                               param1=50, param2=30, minRadius=10, maxRadius=50)
-
-    # Initialize list to store detected shapes and text
-    detected_shapes = []
-
-    # Process each contour
+    # Mask creation and contour filtering
+    instrument_shapes = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        if 50 < w < 500 and 50 < h < 500:  # Adjust size thresholds as needed
+            instrument_shapes.append((x, y, w, h))
+            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-        # Crop detected shape
-        shape_crop = gray[y:y + h, x:x + w]
-        detected_shapes.append({"image": shape_crop, "bbox": (x, y, w, h)})
+    # Display the processed image
+    st.subheader("Processed Image with Detected Shapes:")
+    st.image(img, channels="BGR")
 
-    # Process detected circles
+    # Detect circular symbols using Hough Circle Transform
+    gray_blur = cv2.GaussianBlur(gray, (9, 9), 2)
+    circles = cv2.HoughCircles(
+        gray_blur,
+        cv2.HOUGH_GRADIENT,
+        dp=1,
+        minDist=50,
+        param1=50,
+        param2=30,
+        minRadius=10,
+        maxRadius=50
+    )
+
+    # Draw circles on the original image
     if circles is not None:
         circles = np.uint16(np.around(circles))
         for circle in circles[0, :]:
-            center_x, center_y, radius = circle
-            cv2.circle(img, (center_x, center_y), radius, (0, 255, 0), 2)
+            center = (circle[0], circle[1])  # x, y center
+            radius = circle[2]  # radius
+            cv2.circle(original_img, center, radius, (0, 255, 0), 2)
 
-            # Crop detected circle
-            x, y, r = center_x - radius, center_y - radius, radius * 2
-            circle_crop = gray[y:y + r, x:x + r]
-            detected_shapes.append({"image": circle_crop, "bbox": (x, y, r, r)})
+    # Display the detected circles
+    st.subheader("Processed Image with Detected Circles:")
+    st.image(original_img, channels="BGR")
 
-    # Display the processed image with bounding boxes and circles
-    st.subheader("Processed Image with Shapes and Circles:")
-    st.image(img, channels="BGR")
+    # Display detected shapes and circles with extracted text
+    st.subheader("Extracted Shapes and Text:")
+    cols = st.columns(3)  # Adjust the number of columns as needed
 
-    # Extract text from each detected shape and circle
-    st.subheader("Detected Shapes with Extracted Text:")
-    cols = st.columns(3)  # Adjust number of columns as needed
-
-    for i, shape in enumerate(detected_shapes):
-        shape_image = shape["image"]
-        bbox = shape["bbox"]
-
-        # Use EasyOCR to extract text
-        text = reader.readtext(shape_image, detail=0)
+    # Process instrument shapes
+    for i, (x, y, w, h) in enumerate(instrument_shapes):
+        cropped_shape = img[y:y + h, x:x + w]
+        text = reader.readtext(cropped_shape, detail=0)
         extracted_text = " ".join(text) if text else "No text detected"
-
-        # Display the shape and extracted text
         with cols[i % 3]:
-            st.image(shape_image, caption=f"Shape {i + 1}")
-            st.write(f"Extracted Text: {extracted_text}")
+            st.image(cropped_shape, caption=f"Shape {i + 1}")
+            st.write(f"Text: {extracted_text}")
+
+    # Process detected circles
+    if circles is not None:
+        for i, circle in enumerate(circles[0, :]):
+            x, y, r = circle
+            cropped_circle = original_img[y-r:y+r, x-r:x+r]
+            if cropped_circle.size > 0:
+                text = reader.readtext(cropped_circle, detail=0)
+                extracted_text = " ".join(text) if text else "No text detected"
+                with cols[(i + len(instrument_shapes)) % 3]:
+                    st.image(cropped_circle, caption=f"Circle {i + 1}")
+                    st.write(f"Text: {extracted_text}")
