@@ -32,4 +32,4 @@ pyntcloud
 openai
 datasets
 huggingface_hub
-opencv-python
+opencv-python-headless
