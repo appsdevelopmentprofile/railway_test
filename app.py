@@ -3,16 +3,13 @@ import cv2
 import numpy as np
 from PIL import Image
 import easyocr
-import onnxruntime as ort
+from ultralytics import YOLO
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], verbose=True)
 
-# Path to the ONNX model
-onnx_model_path = '/content/drive/MyDrive/saved_models/my_pid_model.onnx'
-
-# Load the ONNX model
-session = ort.InferenceSession(onnx_model_path)
+# Load the YOLO model (using your 'best.pt' model)
+model = YOLO('/content/drive/MyDrive/best.pt')  # Adjust path to where 'best.pt' is stored
 
 # Streamlit app title
 st.title("P&ID Instrumentation and Symbol Detection")
@@ -30,29 +27,24 @@ if uploaded_file is not None:
     st.subheader("Uploaded Image:")
     st.image(img, channels="BGR")
 
-    # ONNX Symbol Detection
-    st.subheader("ONNX Symbol Detection")
+    # ONNX Symbol Detection (Using the YOLO model)
+    st.subheader("Symbol Detection with YOLO (best.pt)")
 
-    # Preprocess image for ONNX model
-    input_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-    resized_image = cv2.resize(input_image, (640, 640))  # Resize to model input size
-    input_tensor = np.expand_dims(resized_image.transpose(2, 0, 1), axis=0).astype(np.float32) / 255.0
+    # Perform inference with the YOLO model
+    results = model(img)
 
-    # Perform inference with ONNX model
-    outputs = session.run(None, {session.get_inputs()[0].name: input_tensor})
+    # Display the results
+    st.subheader("Detection Results:")
+    
+    # Access bounding boxes, labels, and confidence scores
+    for *xyxy, conf, cls in results[0].boxes.data:  # Get bounding boxes and other info
+        label = model.names[int(cls)]
+        x_min, y_min, x_max, y_max = map(int, xyxy)  # Get bounding box coordinates
+        st.write(f"Detected: {label} with confidence {conf:.2f}")
+        cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
 
-    # Parse ONNX model output
-    detections = outputs[0][0]  # Assuming output is in YOLO format
-    for detection in detections:
-        confidence = detection[4]
-        if confidence > 0.5:  # Filter by confidence threshold
-            x_min, y_min, x_max, y_max = (detection[:4] * [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]).astype(int)
-            label = int(detection[5])
-            cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-            st.write(f"Detected: Class {label} with confidence {confidence:.2f}")
-
-    # Display annotated image with ONNX results
-    st.image(img, caption="ONNX Annotated Image", use_column_width=True)
+    # Display annotated image with YOLO results
+    st.image(img, caption="YOLO Annotated Image", use_column_width=True)
 
     # EasyOCR Text Detection and Instrument Shapes
     st.subheader("Text Extraction and Shape Detection")
