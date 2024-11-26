@@ -9,7 +9,7 @@ from ultralytics import YOLO
 reader = easyocr.Reader(['en'], verbose=True)
 
 # Load the YOLO model (using your 'best.pt' model)
-model = YOLO('/content/drive/MyDrive/best.pt')  # Adjust path to where 'best.pt' is stored
+model = YOLO("yolov8n.pt") 
 
 # Streamlit app title
 st.title("P&ID Instrumentation and Symbol Detection")
