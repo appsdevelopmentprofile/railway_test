@@ -4,4 +4,9 @@ opencv-python==4.8.0.74
 numpy
 pillow
 streamlit
-streamlit-webrtc
+onnxruntime
+ultralytics
+streamlit-webrtc==0.37.0
+speechrecognition==3.10.0
+gtts==2.3.0
+pydub==0.25.1
