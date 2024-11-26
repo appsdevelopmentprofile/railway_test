@@ -8,7 +8,6 @@ import os
 import pickle
 from pathlib import Path
 import streamlit_authenticator as stauth
-from streamlit_webrtc import webrtc_streamer, WebRTCConfiguration
 
 
 # --- Set page configuration ---
