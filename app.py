@@ -3,13 +3,16 @@ import cv2
 import numpy as np
 from PIL import Image
 import easyocr
-from ultralytics import YOLO
+import onnxruntime as ort
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], verbose=True)
 
-# Load YOLO model
-model = YOLO('/path/to/your/trained/model.pt')  # Replace with the actual path
+# Path to the ONNX model
+onnx_model_path = '/content/drive/MyDrive/saved_models/my_pid_model.onnx'
+
+# Load the ONNX model
+session = ort.InferenceSession(onnx_model_path)
 
 # Streamlit app title
 st.title("P&ID Instrumentation and Symbol Detection")
@@ -27,25 +30,35 @@ if uploaded_file is not None:
     st.subheader("Uploaded Image:")
     st.image(img, channels="BGR")
 
-    # YOLO Detection
-    st.subheader("YOLO Symbol Detection")
-    pil_image = Image.open(uploaded_file)
-    results = model(pil_image)  # Perform inference
+    # ONNX Symbol Detection
+    st.subheader("ONNX Symbol Detection")
 
-    # Display YOLO results with bounding boxes and labels
-    for *xyxy, conf, cls in results[0].boxes.data:
-        label = model.names[int(cls)]
-        st.write(f"Detected: {label} with confidence {conf:.2f}")
+    # Preprocess image for ONNX model
+    input_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    resized_image = cv2.resize(input_image, (640, 640))  # Resize to model input size
+    input_tensor = np.expand_dims(resized_image.transpose(2, 0, 1), axis=0).astype(np.float32) / 255.0
 
-    # Annotated YOLO results
-    annotated_image = results[0].plot()  # Create annotated image
-    st.image(annotated_image, caption="YOLO Annotated Image", use_column_width=True)
+    # Perform inference with ONNX model
+    outputs = session.run(None, {session.get_inputs()[0].name: input_tensor})
+
+    # Parse ONNX model output
+    detections = outputs[0][0]  # Assuming output is in YOLO format
+    for detection in detections:
+        confidence = detection[4]
+        if confidence > 0.5:  # Filter by confidence threshold
+            x_min, y_min, x_max, y_max = (detection[:4] * [img.shape[1], img.shape[0], img.shape[1], img.shape[0]]).astype(int)
+            label = int(detection[5])
+            cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+            st.write(f"Detected: Class {label} with confidence {confidence:.2f}")
+
+    # Display annotated image with ONNX results
+    st.image(img, caption="ONNX Annotated Image", use_column_width=True)
 
     # EasyOCR Text Detection and Instrument Shapes
     st.subheader("Text Extraction and Shape Detection")
 
     # Preprocessing for contours
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 50, 150)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
@@ -58,7 +71,7 @@ if uploaded_file is not None:
         x, y, w, h = cv2.boundingRect(contour)
         if 50 < w < 500 and 50 < h < 500:  # Adjust thresholds as needed
             instrument_shapes.append((x, y, w, h))
-            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            cv2.rectangle(original_img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
     # Detect circles using Hough Circle Transform
     gray_blur = cv2.GaussianBlur(gray, (9, 9), 2)
