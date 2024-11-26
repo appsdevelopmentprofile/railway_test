@@ -7,7 +7,7 @@ streamlit
 onnxruntime
 ultralytics
 streamlit-webrtc
-speechrecognition==3.10.0
-gtts==2.3.0
-pydub==0.25.1
+speechrecognition
+gtts
+pydub
 openai
