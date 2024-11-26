@@ -6,7 +6,7 @@ pillow
 streamlit
 onnxruntime
 ultralytics
-streamlit-webrtc==0.37.0
+streamlit-webrtc
 speechrecognition==3.10.0
 gtts==2.3.0
 pydub==0.25.1
