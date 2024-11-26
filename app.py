@@ -3,23 +3,15 @@ import cv2
 import numpy as np
 from PIL import Image
 import easyocr
-from ultralytics import YOLO
-import os
 
 # Initialize EasyOCR reader
 reader = easyocr.Reader(['en'], verbose=True)
 
-# Define the path to the YOLO model file (assuming it's in the same directory as the script)
-model_path = os.path.join(os.path.dirname(__file__), "best.pt")
-
-# Load the YOLO model
-model = YOLO(model_path)
-
-# Streamlit app title
-st.title("P&ID Instrumentation and Symbol Detection")
+# Streamlit frontend
+st.title("Instrumentation Plan Processing with Text Extraction")
 
 # File uploader for image input
-uploaded_file = st.file_uploader("Upload an Image (PNG, JPG, JPEG)", type=["jpg", "jpeg", "png", "PNG"])
+uploaded_file = st.file_uploader("Upload an Image", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     # Read the uploaded image
@@ -31,45 +23,27 @@ if uploaded_file is not None:
     st.subheader("Uploaded Image:")
     st.image(img, channels="BGR")
 
-    # ONNX Symbol Detection (Using the YOLO model)
-    st.subheader("Symbol Detection with YOLO (best.pt)")
-
-    # Perform inference with the YOLO model
-    results = model(img)
-
-    # Display the results
-    st.subheader("Detection Results:")
-    
-    # Access bounding boxes, labels, and confidence scores
-    for *xyxy, conf, cls in results[0].boxes.data:  # Get bounding boxes and other info
-        label = model.names[int(cls)]
-        x_min, y_min, x_max, y_max = map(int, xyxy)  # Get bounding box coordinates
-        st.write(f"Detected: {label} with confidence {conf:.2f}")
-        cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
-
-    # Display annotated image with YOLO results
-    st.image(img, caption="YOLO Annotated Image", use_column_width=True)
-
-    # EasyOCR Text Detection and Instrument Shapes
-    st.subheader("Text Extraction and Shape Detection")
-
-    # Preprocessing for contours
-    gray = cv2.cvtColor(original_img, cv2.COLOR_BGR2GRAY)
+    # Preprocessing: Remove external frame, text, and continuous lines
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 50, 150)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3))
     dilated = cv2.dilate(edges, kernel, iterations=2)
     contours, _ = cv2.findContours(dilated, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Detect and annotate instrument shapes
+    # Mask creation and contour filtering
     instrument_shapes = []
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        if 50 < w < 500 and 50 < h < 500:  # Adjust thresholds as needed
+        if 50 < w < 500 and 50 < h < 500:  # Adjust size thresholds as needed
             instrument_shapes.append((x, y, w, h))
-            cv2.rectangle(original_img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+            cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-    # Detect circles using Hough Circle Transform
+    # Display the processed image
+    st.subheader("Processed Image with Detected Shapes:")
+    st.image(img, channels="BGR")
+
+    # Detect circular symbols using Hough Circle Transform
     gray_blur = cv2.GaussianBlur(gray, (9, 9), 2)
     circles = cv2.HoughCircles(
         gray_blur,
@@ -90,14 +64,15 @@ if uploaded_file is not None:
             radius = circle[2]  # radius
             cv2.circle(original_img, center, radius, (0, 255, 0), 2)
 
-    # Display detected shapes and text
-    st.subheader("Processed Image with Detected Shapes and Circles")
+    # Display the detected circles
+    st.subheader("Processed Image with Detected Circles:")
     st.image(original_img, channels="BGR")
 
-    # Extract text from detected shapes
-    st.subheader("Extracted Text from Detected Shapes and Circles")
-    cols = st.columns(3)
+    # Display detected shapes and circles with extracted text
+    st.subheader("Extracted Shapes and Text:")
+    cols = st.columns(3)  # Adjust the number of columns as needed
 
+    # Process instrument shapes
     for i, (x, y, w, h) in enumerate(instrument_shapes):
         cropped_shape = img[y:y + h, x:x + w]
         text = reader.readtext(cropped_shape, detail=0)
@@ -106,6 +81,7 @@ if uploaded_file is not None:
             st.image(cropped_shape, caption=f"Shape {i + 1}")
             st.write(f"Text: {extracted_text}")
 
+    # Process detected circles
     if circles is not None:
         for i, circle in enumerate(circles[0, :]):
             x, y, r = circle
