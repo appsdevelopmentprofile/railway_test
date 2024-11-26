@@ -180,7 +180,6 @@ elif authentication_status:
             from pydub import AudioSegment
             import speech_recognition as sr
             import streamlit as st
-            from streamlit_webrtc import webrtc_streamer, WebRTCConfiguration
             
             # Function to process audio for speech recognition
             def process_audio(audio_file):
@@ -232,24 +231,66 @@ elif authentication_status:
             st.title("AI Field Assistant")
             
             # Step 1: Record Voice Command
+            st.header("Step 1: Voice Command")
+            st.info("Please record your voice command below.")
             if st.button("Record Command"):
-                response = capture_response()
-                st.write("You said:", response)
-                if response:
-                    equipment = determine_equipment(response)
-                    if equipment:
-                        st.write(f"Equipment detected: {equipment}")
-                        speak(f"{equipment} detected.")
-                    else:
-                        st.write("No known equipment detected.")
-                        speak("I could not identify the equipment.")
+                user_command = capture_response()
+                if "Error" not in user_command:
+                    st.write(f"Recognized Command: {user_command}")
+                else:
+                    st.error(user_command)
             
-            # Display help information
-            st.write("""
-            Instructions:
-            - Click on "Record Command" and speak the equipment name.
-            - The assistant will respond with detected equipment.
-            """)
+            # Step 2: Identify Equipment
+            st.header("Step 2: Equipment Identification")
+            equipment_name = st.text_input("Enter equipment name:", placeholder="e.g., electric unit heater")
+            if st.button("Identify Equipment"):
+                equipment_type = determine_equipment(equipment_name)
+                if equipment_type:
+                    st.success(f"Identified Equipment: {equipment_type}")
+                    speak(f"Questions for {equipment_type}.")
+                else:
+                    st.error("Unable to identify equipment type.")
+            
+            # Step 3: Equipment-Specific Questions
+            equipment_questions = {
+                "electric unit heater": [
+                    "Is the unit heater operational?",
+                    "Are the power supply connections intact?",
+                    "Is the heating element functioning?"
+                ],
+                "air intake": [
+                    "Is the air intake free from obstructions?",
+                    "Are the air filters clean?",
+                    "Is the airflow consistent?"
+                ]
+            }
+            if equipment_type:
+                st.subheader(f"Questions for {equipment_type.title()}")
+                questions = equipment_questions.get(equipment_type, [])
+                for q in questions:
+                    st.write(f"🔹 {q}")
+            
+            # Step 4: Record Responses
+            st.header("Step 4: Record Responses")
+            if st.button("Record Response"):
+                response_text = capture_response()
+                if "Error" not in response_text:
+                    response_audio = f"{equipment_type}_response.wav"
+                    tts = gTTS(response_text, lang='en')
+                    tts.save(response_audio)
+                    st.success("Response recorded.")
+                    st.audio(response_audio)
+                else:
+                    st.error("Failed to capture a valid response.")
+            
+            # Step 5: Match Responses with Checklist
+            st.header("Step 5: Checklist Validation")
+            uploaded_file = st.file_uploader("Upload MP3 response for validation:", type=["mp3"])
+            if uploaded_file:
+                recognized_text = process_audio(uploaded_file)
+                st.write(f"Transcribed Text: {recognized_text}")
+                # Implement comparison logic with checklist if required
+
             
     with col2:
                 # --- CHATBOT IN RIGHT COLUMN ---
