@@ -9,7 +9,7 @@ from ultralytics import YOLO
 reader = easyocr.Reader(['en'], verbose=True)
 
 # Load the YOLO model (using your 'best.pt' model)
-model = YOLO("yolov8n.pt") 
+model = YOLO("/content/drive/MyDrive/best.pt")  # Change to your correct model path
 
 # Streamlit app title
 st.title("P&ID Instrumentation and Symbol Detection")
@@ -23,15 +23,18 @@ if uploaded_file is not None:
     img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
     original_img = img.copy()
 
+    # Convert the image to RGB (YOLO expects RGB input)
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+
     # Display the uploaded image
     st.subheader("Uploaded Image:")
-    st.image(img, channels="BGR")
+    st.image(img_rgb, caption="Original Image", use_column_width=True)
 
-    # ONNX Symbol Detection (Using the YOLO model)
-    st.subheader("Symbol Detection with YOLO (best.pt)")
+    # Symbol Detection with YOLO (best.pt)
+    st.subheader("Symbol Detection with YOLO")
 
     # Perform inference with the YOLO model
-    results = model(img)
+    results = model(img_rgb)
 
     # Display the results
     st.subheader("Detection Results:")
@@ -44,7 +47,7 @@ if uploaded_file is not None:
         cv2.rectangle(img, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
 
     # Display annotated image with YOLO results
-    st.image(img, caption="YOLO Annotated Image", use_column_width=True)
+    st.image(img, caption="YOLO Annotated Image", channels="BGR", use_column_width=True)
 
     # EasyOCR Text Detection and Instrument Shapes
     st.subheader("Text Extraction and Shape Detection")
@@ -88,7 +91,7 @@ if uploaded_file is not None:
 
     # Display detected shapes and text
     st.subheader("Processed Image with Detected Shapes and Circles")
-    st.image(original_img, channels="BGR")
+    st.image(original_img, channels="BGR", caption="Processed Image")
 
     # Extract text from detected shapes
     st.subheader("Extracted Text from Detected Shapes and Circles")
