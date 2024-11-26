@@ -1,6 +1,6 @@
-ultralytics 
-easyocr 
-opencv-python-headless
-numpy 
-pillow 
+ultralytics
+easyocr
+opencv-python-headless==4.8.0.74
+numpy
+pillow
 streamlit
