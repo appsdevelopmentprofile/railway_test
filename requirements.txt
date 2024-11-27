@@ -10,3 +10,8 @@ speechrecognition==3.10.0
 gtts==2.3.0
 pydub==0.25.1
 openai
+SpeechRecognition==3.10.0
+pydub==0.25.1
+python-docx==0.8.11
+ffmpeg==5.1
+pyaudio
