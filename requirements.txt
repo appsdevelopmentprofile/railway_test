@@ -13,3 +13,4 @@ openai
 SpeechRecognition
 python-docx
 ffmpeg
+playsound
