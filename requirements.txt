@@ -13,4 +13,3 @@ openai
 SpeechRecognition
 python-docx
 ffmpeg
-pyaudio
