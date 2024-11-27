@@ -9,6 +9,7 @@ ultralytics
 speechrecognition
 gtts
 sounddevice==0.4.6
+cffi>=1.0
 openai
 SpeechRecognition
 python-docx
