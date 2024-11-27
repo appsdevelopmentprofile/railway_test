@@ -8,7 +8,7 @@ onnxruntime
 ultralytics
 speechrecognition
 gtts
-sounddevice
+sounddevice==0.4.6
 openai
 SpeechRecognition
 python-docx
