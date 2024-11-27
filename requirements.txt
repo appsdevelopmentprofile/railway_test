@@ -8,7 +8,7 @@ onnxruntime
 ultralytics
 speechrecognition
 gtts
-pydub
+sounddevice
 openai
 SpeechRecognition
 python-docx
