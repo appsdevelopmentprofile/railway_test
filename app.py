@@ -177,37 +177,68 @@ elif authentication_status:
 
             import os
             import streamlit as st
+            import sounddevice as sd
+            import numpy as np
+            import scipy.io.wavfile as wav
             from gtts import gTTS
-            import pyaudio
-
-            # STEP 1: Diagnose and recognition
-            # Function to speak text using gTTS
+            from playsound import playsound
+            from pydub import AudioSegment
+            import io
+            from docx import Document
+            import speech_recognition as sr
+            
+            # Function to play text-to-speech using gTTS and sounddevice
             def speak(text):
                 tts = gTTS(text=text, lang='en')
                 tts.save("output.mp3")
-                os.system("afplay output.mp3")  # Use 'afplay' for macOS or modify for other platforms
+                playsound("output.mp3")
             
-            # Equipment categories and associated keywords for identification
-            equipment_keywords = {
-                "electric unit heater": ["electric", "unit", "heater"],
-                "air intake": ["air", "intake"],
-                "ridge vent": ["ridge", "vent"],
-                "exhaust air fan": ["exhaust", "fan"]
-            }
+            # Function to record audio using sounddevice
+            def record_audio(duration=10, sample_rate=16000):
+                st.write("Recording... Speak now.")
+                audio = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1, dtype='int16')
+                sd.wait()  # Wait for the recording to finish
+                st.write("Recording finished.")
+                return audio, sample_rate
             
-            # Function to match the response to the equipment based on keywords
-            def match_equipment(response):
+            # Function to save recorded audio to a WAV file
+            def save_audio(audio, sample_rate, filename="recorded.wav"):
+                wav.write(filename, sample_rate, audio)
+            
+            # Function to transcribe speech using SpeechRecognition
+            def transcribe_audio(filename):
+                recognizer = sr.Recognizer()
+                with sr.AudioFile(filename) as source:
+                    audio_data = recognizer.record(source)
+                    try:
+                        text = recognizer.recognize_google(audio_data)
+                        return text
+                    except sr.UnknownValueError:
+                        return "Could not understand the audio."
+                    except sr.RequestError as e:
+                        return f"Error with speech recognition service: {e}"
+            
+            # Function to match equipment keywords
+            def match_equipment(response, equipment_keywords):
                 response = response.lower()
                 for equipment, keywords in equipment_keywords.items():
                     if any(keyword in response for keyword in keywords):
                         return equipment
                 return None
             
-            # Main function for conducting the field engineer questionnaire
+            # Main questionnaire function
             def field_engineer_questionnaire():
                 st.title("Field Engineer Questionnaire")
             
-                # Initial identification questions
+                # Equipment categories and associated keywords
+                equipment_keywords = {
+                    "electric unit heater": ["electric", "unit", "heater"],
+                    "air intake": ["air", "intake"],
+                    "ridge vent": ["ridge", "vent"],
+                    "exhaust air fan": ["exhaust", "fan"]
+                }
+            
+                # Questions for identification
                 identification_questions = [
                     "What is the equipment name?",
                     "What is the equipment ID?",
@@ -216,25 +247,25 @@ elif authentication_status:
             
                 responses = {}
             
-                # Ask and speak the questions, record responses using the microphone
                 for question in identification_questions:
                     speak(question)
                     st.write(question)
-                    response = st.text_input("Your answer here:")
             
-                    if st.button("Record"):
-                        responses[question] = response
-                        st.write(f"Recorded: {response}")
+                    # Record audio response
+                    if st.button(f"Record for: {question}"):
+                        audio, sample_rate = record_audio()
+                        save_audio(audio, sample_rate, "response.wav")
+                        response_text = transcribe_audio("response.wav")
+                        responses[question] = response_text
+                        st.write(f"Recorded response: {response_text}")
             
                 # Match the response to the equipment
                 equipment_name = responses.get("What is the equipment name?", "").lower()
-                matched_equipment = match_equipment(equipment_name)
+                matched_equipment = match_equipment(equipment_name, equipment_keywords)
             
                 if matched_equipment:
                     st.write(f"Identified equipment: {matched_equipment}")
                     speak(f"The identified equipment is {matched_equipment}.")
-                    
-                    # Here we can proceed to extract the PDF follow-up questions in another stage
                     st.write("Proceeding to the next stage for follow-up questions...")
                 else:
                     st.write("Equipment type not recognized or supported.")
@@ -243,198 +274,42 @@ elif authentication_status:
                 st.write("All responses recorded:", responses)
                 return responses
             
-            # Run the questionnaire in the Streamlit app
-            if __name__ == "__main__":
-                field_engineer_questionnaire()
-
-
-
-
-
-            
-
-            
-            # Step 2: QUESTIONAIRE - RECORDING
-
-            import os
-            import streamlit as st
-            import speech_recognition as sr
-            from playsound import playsound
-            
-            # Function to find the MP3 file based on the equipment name
-            def find_mp3_file(equipment_name, base_path="local_dataset/mp3"):
-                # Construct the file name based on the equipment type
-                mp3_filename = f"{equipment_name.replace(' ', '_')}.mp3"
-                mp3_path = os.path.join(base_path, mp3_filename)
-            
-                # Check if the file exists
-                if os.path.isfile(mp3_path):
-                    return mp3_path
-                else:
-                    st.write("No MP3 file found for the identified equipment.")
-                    return None
-            
-            # Function to play the MP3 file
-            def play_mp3(mp3_path):
-                if mp3_path:
-                    st.write(f"Playing the follow-up questions for {equipment_name}.")
-                    playsound(mp3_path)
-                else:
-                    st.write("No audio to play.")
-            
-            # Function to record speech from the engineer and extract text
-            def record_and_extract_text():
-                recognizer = sr.Recognizer()
-                mic = sr.Microphone()
-            
-                st.write("Please respond to the questions after listening to the audio. Say 'COMPLETED' when you're done.")
-            
-                with mic as source:
-                    recognizer.adjust_for_ambient_noise(source)
-                    st.write("Recording...")
-                    audio = recognizer.listen(source)
-                    st.write("Recording stopped.")
-            
-                # Process the recorded audio
-                try:
-                    text = recognizer.recognize_google(audio)
-                    st.write(f"Recorded response: {text}")
-                    if "completed" in text.lower():
-                        st.write("Recording completed successfully.")
-                        return text
-                    else:
-                        st.write("Engineer did not say 'COMPLETED'. Recording might not have finished.")
-                        return text
-                except sr.UnknownValueError:
-                    st.write("Could not understand the audio.")
-                    return "unrecognized"
-                except sr.RequestError as e:
-                    st.write(f"Error: {e}")
-                    return f"error: {e}"
-            
-            # Main function for the follow-up stage
+            # Follow-up questions stage
             def follow_up_questions_stage(equipment_name):
-                # Find the corresponding MP3 file
+                st.title("Follow-Up Questions Stage")
+            
+                # Find MP3 file
+                def find_mp3_file(equipment_name, base_path="local_dataset/mp3"):
+                    mp3_filename = f"{equipment_name.replace(' ', '_')}.mp3"
+                    mp3_path = os.path.join(base_path, mp3_filename)
+                    if os.path.isfile(mp3_path):
+                        return mp3_path
+                    else:
+                        st.write("No MP3 file found for the identified equipment.")
+                        return None
+            
+                # Play MP3
                 mp3_path = find_mp3_file(equipment_name)
+                if mp3_path:
+                    playsound(mp3_path)
             
-                # Play the MP3 if it exists
-                play_mp3(mp3_path)
-            
-                # Record and extract the response text
-                response_text = record_and_extract_text()
-            
+                # Record response
+                audio, sample_rate = record_audio()
+                save_audio(audio, sample_rate, "follow_up.wav")
+                response_text = transcribe_audio("follow_up.wav")
                 return response_text
             
-            # Example usage in a Streamlit app
+            # Main Streamlit application
             if __name__ == "__main__":
-                st.title("Follow-Up Questions Stage")
-                
-                # Simulate the equipment type (this would come from the previous stage)
-                equipment_name = "air intake"  # Example matched equipment type
+                st.sidebar.title("Navigation")
+                app_mode = st.sidebar.selectbox("Choose the app mode", ["Questionnaire", "Follow-Up"])
             
-                # Run the follow-up stage
-                response = follow_up_questions_stage(equipment_name)
-                st.write(f"Final recorded response: {response}")
-
-
-            
-            # Step 3: Record Responses to fill the checklist taken from the data Lake
-            import streamlit as st
-            import speech_recognition as sr
-            from pydub import AudioSegment
-            import io
-            from docx import Document
-            
-            # Streamlit header for UI
-            st.header("Step 4: Record Responses")
-            
-            # Function to recognize speech from an MP3 file
-            def recognize_speech_from_mp3(mp3_file_path):
-                recognizer = sr.Recognizer()
-                audio = AudioSegment.from_mp3(mp3_file_path)
-                
-                # Export audio data to a bytes buffer in WAV format
-                audio_data = io.BytesIO()
-                audio.export(audio_data, format="wav")
-                audio_data.seek(0)
-            
-                with sr.AudioFile(audio_data) as source:
-                    audio_recorded = recognizer.record(source)
-                    try:
-                        # Return the recognized text in lowercase
-                        return recognizer.recognize_google(audio_recorded).lower()
-                    except sr.UnknownValueError:
-                        return "unrecognized"
-                    except sr.RequestError as e:
-                        return f"error: {e}"
-            
-            # Function to analyze response for 'yes' or 'no' based on keywords
-            def analyze_response(response_text):
-                yes_keywords = ["yes", "yeah", "yep", "affirmative", "sure"]
-                no_keywords = ["no", "nope", "nah", "negative", "not"]
-            
-                response_text = response_text.lower()
-            
-                if any(yes_keyword in response_text for yes_keyword in yes_keywords):
-                    return "yes"
-                elif any(no_keyword in response_text for no_keyword in no_keywords):
-                    return "no"
-                else:
-                    return "unknown"
-            
-            # Function to fill out the checklist based on responses
-            def fill_checklist(checklist_template, responses):
-                for item, response in responses.items():
-                    for paragraph in checklist_template.paragraphs:
-                        if item in paragraph.text:
-                            # Update the checkbox based on response
-                            if response == "yes":
-                                paragraph.text = paragraph.text.replace('☐', '☑')
-                            elif response == "no":
-                                paragraph.text = paragraph.text.replace('☐', '☐')
-                return checklist_template
-            
-            # Function to save the filled checklist to a document
-            def save_filled_checklist(checklist_template, output_filename="filled_checklist.docx"):
-                checklist_template.save(output_filename)
-                print(f"Document '{output_filename}' created successfully.")
-                st.success(f"Document '{output_filename}' created successfully.")
-            
-            # Main function to orchestrate the process
-            def main():
-                # Specify the MP3 file and checklist file paths
-                mp3_file_path = "/content/drive/MyDrive/engineer_equipment.mp3"  # Update as needed
-                checklist_filename = "/content/drive/MyDrive/predefined_checklist.docx"  # Update as needed
-            
-                # Step 1: Extract text from the MP3 file
-                print("Extracting text from MP3 file...")
-                response_text = recognize_speech_from_mp3(mp3_file_path)
-            
-                # Step 2: Analyze the response
-                if response_text and response_text != "unrecognized":
-                    print("Recognized response:", response_text)
-                    response = analyze_response(response_text)
-                    print("Analyzed response:", response)
-            
-                    # Step 3: Load the checklist and update it based on the response
-                    checklist_template = Document(checklist_filename)
-                    responses = {
-                        "Is the unit heater operational?": response,
-                        "Are the power supply connections intact?": response,
-                        "Is the heating element functioning?": response
-                    }
-            
-                    # Step 4: Fill and save the checklist
-                    filled_checklist = fill_checklist(checklist_template, responses)
-                    save_filled_checklist(filled_checklist)
-            
-                else:
-                    print("Speech recognition failed or no speech was recognized.")
-                    st.error("Speech recognition failed or no speech was recognized.")
-            
-            # Run the main function if this script is executed directly
-            if __name__ == "__main__":
-                main()
+                if app_mode == "Questionnaire":
+                    field_engineer_questionnaire()
+                elif app_mode == "Follow-Up":
+                    example_equipment = "air intake"  # Example placeholder
+                    follow_up_response = follow_up_questions_stage(example_equipment)
+                    st.write(f"Final recorded response: {follow_up_response}")
 
 
             
