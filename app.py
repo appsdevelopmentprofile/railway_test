@@ -186,6 +186,56 @@ elif authentication_status:
             import io
             from docx import Document
             import speech_recognition as sr
+
+
+            st.write("""There needs to be a pre trained model (only containing the checklist fromats) connected to the data lake
+
+For every document that is added to the Data Lake, there will be a process of rename and auto mp3 generation.
+
+Rename process: designed to have standarization and accurate diagnose. Can be done from OCR to identify tags, or maually from the operator setting the name once it is submitted. The proposed labeling is:
+"project/type_of_document/operation/type of equipment/label of the equipment (or tag of the process).pdf"
+
+
+Auto mp3 generarion: designed to ask the questionaire to the engineer before fillinf the checklist. It will be done with the same YoloV5 capacibilities to identfy objects, and text. Once test is identified, another library will generate the mp3 file with the same name.
+
+
+WORKFLOW:
+
+SUBMITTING THE CHECLIST FORMATS
+Peter is an engineer, he submits the checlkits ot the data lake. The name of the file is "1-1_2-IN-70R902_CNPI25E_Cleanliness_and_Drying_Summary_19079_page_1.jpg"
+
+The pre trained model makes the first text recognitin, with feature recognition labels the file and renames it. For testing purposes, the new file will be named as: Braya_Checklist_Cleanliness_and_Drying_Piping_170R902.jpg
+
+Once it is renamed, the pre trained model does the second text recognition to get the written questions, put them on text and the library generates the mp3 file
+
+
+QUESTIONAIRE PROCESS FORM ENGINEER
+
+3 weeks later, the project is completed, and Peter is requested to fill the checklist, is -30 in the beautiful province of Alberta
+
+Peter turns on the virtual assisstant: "TURN ON QUESTIONS"
+
+The system will have a mp3 with a present questionaire with 5 questions
+
+# Question 1: what is the project?
+# Question 2: what is the type of document?
+# Quesion 3: what is the operation?
+# Question 4: What is the type of equipment?
+# Question 5: what is the label of the equipment (or tag of the process)?
+
+
+EXAMPLE (Peter responds):
+
+
+# Question 1: Braya
+# Quesion 2: Checklist
+# Question 3: Cleanliness_and_Drying
+# Question 4: Piping
+# Question 5: 170R902
+
+Based on the responsed of the engineer, the system identifies from all thouands of documents that the engineers needs the next checklist: "Braya_Checklist_Cleanliness_and_Drying_Piping_170R902.jpg"
+
+Then, the system automatically reproduces the MP3 qie the checklist questions: Braya_Checklist_Cleanliness_and_Drying_Piping_170R902.mp3""")
             
             # Function to play text-to-speech using gTTS and sounddevice
             def speak(text):
