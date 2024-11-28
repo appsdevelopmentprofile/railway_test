@@ -235,7 +235,13 @@ EXAMPLE (Peter responds):
 
 Based on the responsed of the engineer, the system identifies from all thouands of documents that the engineers needs the next checklist: "Braya_Checklist_Cleanliness_and_Drying_Piping_170R902.jpg"
 
-Then, the system automatically reproduces the MP3 qie the checklist questions: Braya_Checklist_Cleanliness_and_Drying_Piping_170R902.mp3""")
+Then, the system automatically reproduces the MP3 qie the checklist questions: Braya_Checklist_Cleanliness_and_Drying_Piping_170R902.mp3
+
+now, I need to you reproduce it automatically and record the answers that the engineer says. Once the engineer says: "Q COMPLETED", the system will stop the recording and save a new mp3 to extract the answers voice and convert them to text
+
+now, tag the answers with yes or no for each question and fill the check box in the source file and then auto save it. Once it is auto saved, the system will confirm the engineer saying: "document has been saved, autofill with Virtual assistant completed"
+
+""")
             
             # Function to play text-to-speech using gTTS and sounddevice
             def speak(text):
