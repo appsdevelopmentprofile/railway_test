@@ -1,6 +1,6 @@
 ultralytics
 easyocr
-opencv-python
+opencv-python-headless==4.7.0.68
 numpy
 pillow
 streamlit
