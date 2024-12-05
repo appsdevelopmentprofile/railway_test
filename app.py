@@ -10,36 +10,6 @@ from pathlib import Path
 import streamlit_authenticator as stauth
 
 
-
-
-import subprocess
-import sys
-
-# Function to install or upgrade a package
-def install_or_upgrade_package(package_name):
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", package_name])
-        print(f"Successfully installed or upgraded {package_name}")
-    except Exception as e:
-        print(f"Failed to install or upgrade {package_name}: {e}")
-
-# List of required packages
-required_packages = ["rasterio", "numpy", "matplotlib", "scikit-learn", "streamlit"]
-
-# Install or upgrade each package
-for package in required_packages:
-    install_or_upgrade_package(package)
-
-# Streamlit app code starts here
-import streamlit as st
-
-st.title("Dynamic Package Upgrade in Streamlit")
-st.write("All necessary libraries have been installed or upgraded!")
-
-
-
-
-
 # --- Set page configuration ---
 st.set_page_config(
     page_title="corsarious",
