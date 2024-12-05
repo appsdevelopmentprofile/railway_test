@@ -14,4 +14,3 @@ SpeechRecognition
 python-docx
 ffmpeg
 playsound
-upgrade pip
