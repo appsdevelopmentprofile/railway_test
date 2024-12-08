@@ -1,20 +1,24 @@
-# Use a base image with Python 3.12
+# Use a Python base image
 FROM python:3.12-slim
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy the requirements file and install dependencies
-COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Copy the requirements.txt into the container
+COPY requirements.txt .
 
-# Copy the application files into the container
-COPY . /app
+# Install system dependencies (if needed for specific libraries)
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    libsndfile1 \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
 
-# Expose port 8501 for Streamlit
-EXPOSE 8501
+# Install the Python dependencies
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Run the application with Streamlit
+# Copy the application code into the container
+COPY . .
+
+# Set the default command to run your app (adjust if needed)
 CMD ["streamlit", "run", "app.py"]
-
-
