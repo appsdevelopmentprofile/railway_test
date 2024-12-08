@@ -1,8 +1,3 @@
-# Command to run the Streamlit app
-CMD ["streamlit", "run", "app.py"]
-
-
-
 # Use a base image with Python 3.12
 FROM python:3.12-slim
 
